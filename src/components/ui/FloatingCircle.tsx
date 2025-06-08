@@ -3,6 +3,10 @@ import { ReactNode } from 'react';
 interface FloatingCircleProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   /**
+   * Optional title to display above the circle
+   */
+  title?: string;
+  /**
    * Background color of the circle
    * @default '#2F80ED'
    */
@@ -47,26 +51,37 @@ export default function FloatingCircle({
   height = '68px',
   bottom = '27px',
   right = '34px',
+  title = '',
   className = '',
   onClick,
   children,
   ...props
 }: FloatingCircleProps) {
   return (
-    <div 
-      className={`absolute flex items-center justify-center rounded-full ${className}`}
-      style={{
-        backgroundColor: bgColor,
-        width: typeof width === 'number' ? `${width}px` : width,
-        height: typeof height === 'number' ? `${height}px` : height,
-        bottom: typeof bottom === 'number' ? `${bottom}px` : bottom,
-        right: typeof right === 'number' ? `${right}px` : right,
-      }}
-      onClick={onClick}
-      {...props}
+    <div className="absolute flex flex-col items-center" 
+         style={{
+           bottom: typeof bottom === 'number' ? `${bottom}px` : bottom,
+           right: typeof right === 'number' ? `${right}px` : right,
+         }}
     >
-      <div className="flex items-center justify-center w-full h-full">
-        {children}
+      {title && (
+        <div className="text-white text-sm font-medium mb-2 whitespace-nowrap">
+          {title}
+        </div>
+      )}
+      <div 
+        className={`flex items-center justify-center rounded-full ${className}`}
+        style={{
+          backgroundColor: bgColor,
+          width: typeof width === 'number' ? `${width}px` : width,
+          height: typeof height === 'number' ? `${height}px` : height,
+        }}
+        onClick={onClick}
+        {...props}
+      >
+        <div className="flex items-center justify-center w-full h-full">
+          {children}
+        </div>
       </div>
     </div>
   );
