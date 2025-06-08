@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
-interface FloatingCircleProps {
+interface FloatingCircleProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
   /**
    * Background color of the circle
    * @default '#2F80ED'
@@ -46,9 +47,9 @@ export default function FloatingCircle({
   height = '68px',
   bottom = '27px',
   right = '34px',
-  icon,
   className = '',
   onClick,
+  children,
   ...props
 }: FloatingCircleProps) {
   return (
@@ -64,7 +65,9 @@ export default function FloatingCircle({
       onClick={onClick}
       {...props}
     >
-      {icon}
+      <div className="flex items-center justify-center w-full h-full">
+        {children}
+      </div>
     </div>
   );
 }
