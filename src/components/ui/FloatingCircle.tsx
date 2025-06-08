@@ -7,6 +7,11 @@ interface FloatingCircleProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   title?: string;
   /**
+   * Color of the title text
+   * @default 'white'
+   */
+  titleColor?: string;
+  /**
    * Background color of the circle
    * @default '#2F80ED'
    */
@@ -49,9 +54,10 @@ export default function FloatingCircle({
   bgColor = '#2F80ED',
   width = '68px',
   height = '68px',
-  bottom = '27px',
-  right = '34px',
+  bottom = '0px',
+  right = '0px',
   title = '',
+  titleColor = 'white',
   className = '',
   onClick,
   children,
@@ -65,7 +71,10 @@ export default function FloatingCircle({
          }}
     >
       {title && (
-        <div className="text-white text-sm font-medium mb-2 whitespace-nowrap">
+        <div 
+          className="text-sm font-medium mb-2 whitespace-nowrap"
+          style={{ color: titleColor }}
+        >
           {title}
         </div>
       )}
