@@ -30,16 +30,17 @@ export default function SearchBar({
   ...props
 }: SearchBarProps & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative h-[58px] ${className}`}>
       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
         <SearchIcon color={iconColor} />
       </div>
       <input
         type="text"
-        className={`w-full pl-10 py-2 text-${textColor} bg-[${bgColor}] focus:outline-none`}
+        className={`w-full h-full pl-10 text-${textColor} bg-[${bgColor}] focus:outline-none`}
         style={{
           backgroundColor: bgColor,
-          color: textColor
+          color: textColor,
+          height: '100%'
         }}
         {...props}
       />
