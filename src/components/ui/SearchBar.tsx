@@ -32,7 +32,7 @@ export default function SearchBar({
   return (
     <div className={`relative h-[58px] ${className}`}>
       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <SearchIcon color={iconColor} />
+        <SearchIcon color={iconColor} size={16} />
       </div>
       <input
         type="text"
