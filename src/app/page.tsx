@@ -43,7 +43,7 @@ export default function HomePage() {
             } ${
               activeCircle === 'inbox' 
                 ? 'fixed bottom-0 right-0 mb-[27px] mr-[34px]' 
-                : 'absolute bottom-[27px] right-[128px]'
+                : 'absolute bottom-[30px] right-[128px]'
             }`}
             style={{
               transitionDelay: isExpanded ? '0ms' : '150ms'
@@ -91,8 +91,8 @@ export default function HomePage() {
               activeCircle === 'task'
                 ? 'fixed bottom-0 right-0 mb-[27px] mr-[34px]'
                 : activeCircle === 'inbox'
-                  ? 'absolute bottom-[27px] right-[128px]'
-                  : 'absolute bottom-[27px] right-[214px]'
+                  ? 'absolute bottom-[30px] right-[128px]'
+                  : 'absolute bottom-[30px] right-[214px]'
             }`}
             style={{
               transitionDelay: isExpanded ? '150ms' : '0ms'
