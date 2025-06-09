@@ -61,7 +61,7 @@ export default function HomePage() {
                 height={32}
                 bgColor="white"
                 textColor="#333"
-                borderColor="#E0E0E0"
+                borderColor="#828282"
                 placeholder="Search"
                 iconColor="#828282"
                 iconRightMargin={55}
