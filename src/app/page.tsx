@@ -56,7 +56,7 @@ export default function HomePage() {
             <div className="relative flex justify-center">
               <SearchBar
                 absolute={false}
-                className="mt-[15px] mx-auto"
+                className="mt-[20px]"
                 width={666}
                 height={32}
                 bgColor="white"
