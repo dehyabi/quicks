@@ -3,12 +3,15 @@ import { ReactNode } from 'react';
 interface FloatingCircleProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   /**
-   * Optional title to display above the circle
+   * Title text to display above the circle
    */
   title?: string;
   /**
+   * Whether to show the title (default: true)
+   */
+  showTitle?: boolean;
+  /**
    * Color of the title text
-   * @default 'white'
    */
   titleColor?: string;
   /**
@@ -17,25 +20,25 @@ interface FloatingCircleProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   bgColor?: string;
   /**
-   * Width of the circle
+   * Width of the circle (in pixels or any valid CSS value)
    * @default '68px'
    */
-  width?: string | number;
+  width?: number | string;
   /**
-   * Height of the circle
+   * Height of the circle (in pixels or any valid CSS value)
    * @default '68px'
    */
-  height?: string | number;
+  height?: number | string;
   /**
-   * Position from bottom
+   * Position from bottom (in pixels or any valid CSS value)
    * @default '27px'
    */
-  bottom?: string | number;
+  bottom?: number | string;
   /**
-   * Position from right
+   * Position from right (in pixels or any valid CSS value)
    * @default '34px'
    */
-  right?: string | number;
+  right?: number | string;
   /**
    * Optional icon to display inside the circle
    */
@@ -57,6 +60,7 @@ export default function FloatingCircle({
   bottom = '0px',
   right = '0px',
   title = '',
+  showTitle = true,
   titleColor = 'white',
   className = '',
   onClick,
@@ -70,7 +74,7 @@ export default function FloatingCircle({
            right: typeof right === 'number' ? `${right}px` : right,
          }}
     >
-      {title && (
+      {showTitle && title && (
         <div 
           className="text-sm font-medium mb-2 whitespace-nowrap"
           style={{ color: titleColor }}
