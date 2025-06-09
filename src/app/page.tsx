@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
 import FloatingCircle from "@/components/ui/FloatingCircle";
+import Modal from "@/components/ui/Modal";
 import ThunderIcon from "@/components/ui/icons/ThunderIcon";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
 import TaskIcon from "@/components/ui/icons/TaskIcon";
@@ -13,9 +14,19 @@ type ActiveCircle = 'task' | 'inbox' | null;
 export default function HomePage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
+  const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
 
   const handleCircleClick = (circle: ActiveCircle) => {
-    setActiveCircle(prev => prev === circle ? null : circle);
+    const newActiveCircle = activeCircle === circle ? null : circle;
+    setActiveCircle(newActiveCircle);
+    if (circle === 'inbox') {
+      setIsInboxModalOpen(newActiveCircle === 'inbox');
+    }
+  };
+
+  const closeInboxModal = () => {
+    setIsInboxModalOpen(false);
+    setActiveCircle(null);
   };
 
   const toggleExpand = () => {
@@ -31,6 +42,19 @@ export default function HomePage() {
       <Sidebar />
       <div className="w-[1px] bg-[#F2F2F2]" />
       <main className="flex-1">
+        {/* Inbox Modal */}
+        <Modal 
+          isOpen={isInboxModalOpen} 
+          onClose={closeInboxModal}
+          width={734}
+          height={737}
+        >
+          <div className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Inbox</h2>
+            {/* Add your inbox content here */}
+            <p className="text-gray-600">Your inbox content will appear here.</p>
+          </div>
+        </Modal>
         <SearchBar />
 
         <div className="fixed bottom-0 right-0 z-50">
