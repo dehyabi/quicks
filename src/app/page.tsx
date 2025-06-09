@@ -56,7 +56,7 @@ export default function HomePage() {
                 bgColor="#828282"
                 width={68}
                 height={68}
-                right={49}
+                right={47}
                 bottom={68}
                 showTitle={false}
               />
@@ -105,7 +105,7 @@ export default function HomePage() {
                 bgColor="#828282"
                 width={68}
                 height={68}
-                right={49}
+                right={47}
                 bottom={68}
                 showTitle={false}
               />
