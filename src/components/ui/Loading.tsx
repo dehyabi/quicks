@@ -49,7 +49,7 @@ const Loading: React.FC<LoadingProps> = ({
       `}</style>
       <div className="flex flex-col items-center justify-center" style={{ gap: '34px' }}>
         <div style={circleStyle}></div>
-        <span className="text-[#4F4F4F] text-sm">Loading Charts ...</span>
+        <span className="text-[#4F4F4F] text-sm">Loading Chats ...</span>
       </div>
     </div>
   );

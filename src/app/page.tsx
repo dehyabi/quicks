@@ -6,6 +6,7 @@ import SearchBar from "@/components/ui/SearchBar";
 import FloatingCircle from "@/components/ui/FloatingCircle";
 import Modal from "@/components/ui/Modal";
 import Loading from "@/components/ui/Loading";
+import ChatComponent from "@/components/ui/ChatComponent";
 import ThunderIcon from "@/components/ui/icons/ThunderIcon";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
 import TaskIcon from "@/components/ui/icons/TaskIcon";
@@ -18,6 +19,28 @@ export default function HomePage() {
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Sample chat data
+  const [chats] = useState([
+    {
+      id: 1,
+      title: 'New Message',
+      name: 'John Doe',
+      content: 'Hi there! Just wanted to check in about the project timeline. Do you think we can have the first draft ready by Friday?'
+    },
+    {
+      id: 2,
+      title: 'Team Update',
+      name: 'Sarah Wilson',
+      content: 'The design assets have been uploaded to the shared drive. Let me know if you need any adjustments.'
+    },
+    {
+      id: 3,
+      title: 'Meeting Reminder',
+      name: 'Alex Johnson',
+      content: 'Just a reminder about our 2pm sync tomorrow. We\'ll be discussing the Q2 marketing strategy.'
+    }
+  ]);
 
   const handleCircleClick = (circle: ActiveCircle) => {
     const newActiveCircle = activeCircle === circle ? null : circle;
@@ -87,9 +110,22 @@ export default function HomePage() {
               {isLoading ? (
                 <Loading />
               ) : (
-                <div className="mt-4 p-6">
-                  <h2 className="text-2xl font-bold mb-4">Inbox</h2>
-                  {/* Add your inbox content here */}
+                <div className="p-6 overflow-y-auto h-full">
+                  <div className="space-y-0">
+                    {chats.map((chat, index) => (
+                      <div key={chat.id} className="relative">
+                        {index > 0 && (
+                          <div className="h-px bg-[#828282] mx-6 my-4"></div>
+                        )}
+                        <ChatComponent
+                          title={chat.title}
+                          name={chat.name}
+                          content={chat.content}
+                          className="cursor-pointer"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
