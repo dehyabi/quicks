@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
 import FloatingCircle from "@/components/ui/FloatingCircle";
 import Modal from "@/components/ui/Modal";
+import Loading from "@/components/ui/Loading";
 import ThunderIcon from "@/components/ui/icons/ThunderIcon";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
 import TaskIcon from "@/components/ui/icons/TaskIcon";
@@ -16,12 +17,25 @@ export default function HomePage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCircleClick = (circle: ActiveCircle) => {
     const newActiveCircle = activeCircle === circle ? null : circle;
     setActiveCircle(newActiveCircle);
+    
     if (circle === 'inbox') {
-      setIsInboxModalOpen(newActiveCircle === 'inbox');
+      const shouldOpen = newActiveCircle === 'inbox';
+      setIsInboxModalOpen(shouldOpen);
+      
+      if (shouldOpen) {
+        setIsLoading(true);
+        // Simulate loading for 3 seconds
+        const timer = setTimeout(() => {
+          setIsLoading(false);
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }
     }
   };
 
@@ -51,8 +65,8 @@ export default function HomePage() {
           height={737}
           className="bg-[#F2F2F2]"
         >
-          <div className="w-full">
-            {/* Search Bar */}
+          <div className="w-full h-full relative">
+            {/* Always show Search Bar */}
             <div className="relative flex justify-center">
               <SearchBar
                 absolute={false}
@@ -68,10 +82,16 @@ export default function HomePage() {
               />
             </div>
             
-            {/* Inbox Content */}
-            <div className="mt-4 p-6">
-              <h2 className="text-2xl font-bold mb-4">Inbox</h2>
-              {/* Add your inbox content here */}
+            {/* Show loading or content */}
+            <div className="w-full h-[calc(100%-52px)] relative">
+              {isLoading ? (
+                <Loading />
+              ) : (
+                <div className="mt-4 p-6">
+                  <h2 className="text-2xl font-bold mb-4">Inbox</h2>
+                  {/* Add your inbox content here */}
+                </div>
+              )}
             </div>
           </div>
         </Modal>
