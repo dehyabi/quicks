@@ -3,19 +3,22 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable static exports for Netlify
   output: 'export',
-  
+
+  // Ensure build outputs to the 'out' directory
+  distDir: 'out',
+
   // Optional: Add basePath if your app is not served from the root
   // basePath: '/your-base-path',
-  
-  // Optional: Configure images
+
+  // Required for static image support
   images: {
-    unoptimized: true, // Required for static exports
+    unoptimized: true,
   },
-  
-  // Optional: Enable React Strict Mode
+
+  // Enable React Strict Mode
   reactStrictMode: true,
-  
-  // Optional: Configure page extensions
+
+  // Optional: Custom page extensions
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
 };
 
