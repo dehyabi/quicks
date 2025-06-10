@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static exports for Netlify
+  // Enable static exports
   output: 'export',
   
-  // Optional: Add basePath if your app is not served from the root
-  // basePath: '/your-base-path',
+  // Output directory for the static export
+  distDir: 'out',
   
   // Configure images
   images: {
@@ -16,6 +16,9 @@ const nextConfig = {
   
   // Configure page extensions
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  
+  // Optional: Add basePath if your app is not served from the root
+  // basePath: '/your-base-path',
 };
 
 module.exports = nextConfig;
