@@ -7,10 +7,9 @@
   },
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && next export -o dist",
+    "build": "next build && next export",
     "start": "next start",
-    "lint": "next lint",
-    "postbuild": "cp -r public dist/"
+    "lint": "next lint"
   },
   "dependencies": {
     "react": "^19.0.0",
