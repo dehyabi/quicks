@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Quicks - Modern Chat Interface
 
-## Getting Started
+A sleek, responsive chat interface built with Next.js, TypeScript, and Tailwind CSS. This project features a floating action button that expands to reveal additional actions, including an inbox modal with message previews.
 
-First, run the development server:
+## ✨ Features
+
+- Modern, clean UI with smooth animations
+- Responsive design that works on all screen sizes
+- Floating action button with expandable menu
+- Inbox modal with message previews
+- Loading states and transitions
+- Built with TypeScript for type safety
+- Styled with Tailwind CSS
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 16.8 or later
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/dehyabi/quicks.git
+   cd quicks
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   # or
+   yarn
+   ```
+
+3. Start the development server
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## 🛠️ Build & Deployment
+
+### Build for Production
 
 ```bash
-npm run dev
+npm run build
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Export Static Site
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run export
+# or
+yarn export
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This will create a `dist` folder with the static export of your app.
 
-## Learn More
+### Deploy to Netlify
 
-To learn more about Next.js, take a look at the following resources:
+This project is configured for deployment to Netlify with the following settings:
+- Build command: `next build && next export -o dist`
+- Publish directory: `dist`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧩 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/src/app` - Next.js app directory with page components
+- `/src/components` - Reusable UI components
+- `/src/components/ui` - Base UI components
+- `/public` - Static assets
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [Next.js](https://nextjs.org/) - React framework
+- [TypeScript](https://www.typescriptlang.org/) - Type checking
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
