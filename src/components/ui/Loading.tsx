@@ -18,7 +18,6 @@ interface LoadingProps {
 }
 
 const Loading: React.FC<LoadingProps> = ({
-  size = 8.54,
   color = '#C4C4C4',
   className = '',
 }) => {

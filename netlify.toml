@@ -1,0 +1,24 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--version"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[dev]
+  framework = "next"
+  command = "npm run dev"
+  targetPort = 3000
+  port = 3000
+
+# Required for client-side routing in Next.js
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Required for Next.js API routes
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

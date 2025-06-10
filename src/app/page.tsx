@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
 import FloatingCircle from "@/components/ui/FloatingCircle";
@@ -10,7 +10,6 @@ import ChatComponent from "@/components/ui/ChatComponent";
 import ThunderIcon from "@/components/ui/icons/ThunderIcon";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
 import TaskIcon from "@/components/ui/icons/TaskIcon";
-import SearchIcon from "@/components/ui/icons/SearchIcon";
 
 type ActiveCircle = 'task' | 'inbox' | null;
 
@@ -42,29 +41,29 @@ export default function HomePage() {
     }
   ]);
 
-  const handleCircleClick = (circle: ActiveCircle) => {
-    const newActiveCircle = activeCircle === circle ? null : circle;
+  const handleInboxClick = () => {
+    const newActiveCircle = activeCircle === 'inbox' ? null : 'inbox';
     setActiveCircle(newActiveCircle);
+    setIsInboxModalOpen(!!newActiveCircle);
     
-    if (circle === 'inbox') {
-      const shouldOpen = newActiveCircle === 'inbox';
-      setIsInboxModalOpen(shouldOpen);
-      
-      if (shouldOpen) {
-        setIsLoading(true);
-        // Simulate loading for 3 seconds
-        const timer = setTimeout(() => {
-          setIsLoading(false);
-        }, 3000);
-        
-        return () => clearTimeout(timer);
-      }
+    if (newActiveCircle === 'inbox') {
+      setIsLoading(true);
+      // Simulate loading for 1 second
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    } else {
+      setIsInboxModalOpen(false);
     }
   };
 
-  const closeInboxModal = () => {
-    setIsInboxModalOpen(false);
-    setActiveCircle(null);
+  const handleTaskClick = () => {
+    const newActiveCircle = activeCircle === 'task' ? null : 'task';
+    setActiveCircle(newActiveCircle);
+    
+    if (newActiveCircle === 'task') {
+      // Add any task-specific logic here
+    }
   };
 
   const toggleExpand = () => {
@@ -82,8 +81,7 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Inbox Modal */}
         <Modal 
-          isOpen={isInboxModalOpen} 
-          onClose={closeInboxModal}
+          isOpen={isInboxModalOpen}
           width={734}
           height={737}
           className="bg-[#F2F2F2]"
@@ -171,7 +169,7 @@ export default function HomePage() {
               height={activeCircle === 'inbox' ? 68 : 60}
               titleColor="#F2F2F2"
               showTitle={showTitles}
-              onClick={() => handleCircleClick('inbox')}
+              onClick={handleInboxClick}
             >
               <InboxIcon 
                 width={24} 
@@ -220,7 +218,7 @@ export default function HomePage() {
               height={activeCircle === 'task' ? 68 : 60}
               titleColor="#F2F2F2"
               showTitle={showTitles}
-              onClick={() => handleCircleClick('task')}
+              onClick={handleTaskClick}
             >
               <TaskIcon 
                 width={24} 

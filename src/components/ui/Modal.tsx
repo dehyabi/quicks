@@ -2,7 +2,6 @@ import React from 'react';
 
 interface ModalProps {
   isOpen: boolean;
-  onClose: () => void;
   children: React.ReactNode;
   width?: number | string;
   height?: number | string;
@@ -11,12 +10,13 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
-  onClose,
   children,
   width = 734,
   height = 737,
   className = '',
 }) => {
+  if (!isOpen) return null;
+
   return (
     <div 
       className={`fixed z-50 bg-white rounded-[5px] transition-all duration-300 ease-out transform ${
