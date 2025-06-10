@@ -1,6 +1,7 @@
 [build]
   command = "npm install && npm run build"
-  publish = "out"
+  publish = ".next/static"
+  functions = ".next/server"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -8,10 +9,10 @@
   NEXT_TELEMETRY_DISABLED = "1"
 
 [dev]
-  framework = "next"
   command = "npm run dev"
   targetPort = 3000
   port = 3000
+  publish = ".next/static"
 
 # Required for client-side routing in Next.js
 [[redirects]]
@@ -19,6 +20,9 @@
   to = "/index.html"
   status = 200
 
-# Required for Next.js API routes
+# Required for Next.js
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+  [plugins.inputs]
+    publish = ".next/static"
+    functions = ".next/server"
