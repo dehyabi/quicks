@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const ThreeDotsIcon = ({ className = '' }) => (
   <svg 
@@ -103,11 +103,40 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
   onMenuClick,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMenu(!showMenu);
     onMenuClick?.(e);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    // Add your edit logic here
+    console.log('Edit clicked');
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    // Add your delete logic here
+    console.log('Delete clicked');
   };
 
   return (
@@ -142,16 +171,41 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
           </div>
         </div>
       </div>
-      <button 
-        onClick={handleMenuClick}
-        className={`mx-3 flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors ${alignRight ? 'ml-2' : 'mr-2'}`}
-        style={{
-          marginTop: showSenderName ? '1.5rem' : '0.5rem',
-          alignSelf: 'flex-start'
-        }}
-      >
-        <ThreeDotsIcon />
-      </button>
+      <div className="relative" ref={menuRef}>
+        <button 
+          onClick={handleMenuClick}
+          className={`flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors ${alignRight ? 'ml-2' : 'mr-2'}`}
+          style={{
+            marginTop: showSenderName ? '1.5rem' : '0.5rem',
+            alignSelf: 'flex-start'
+          }}
+        >
+          <ThreeDotsIcon />
+        </button>
+        
+        {showMenu && (
+          <div 
+            className={`absolute z-50 mt-1 w-40 bg-white rounded-md shadow-lg py-1 ${alignRight ? 'right-0' : 'left-0'}`}
+            style={{
+              border: '1px solid #E5E7EB',
+            }}
+          >
+            <button
+              onClick={handleEdit}
+              className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
+            >
+              Edit
+            </button>
+            <div className="border-t border-gray-200 my-1"></div>
+            <button
+              onClick={handleDelete}
+              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

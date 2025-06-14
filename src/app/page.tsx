@@ -27,9 +27,43 @@ export default function HomePage() {
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
   
   // Sample chat data
   const [chats] = useState([
+    {
+      id: 4,
+      title: 'FastVisa Support',
+      name: 'FastVisa Support',
+      content: 'Hello! How can we assist you with your visa application today?',
+      participants: [
+        { id: 1, name: 'FastVisa Support', role: 'Support Agent' },
+        { id: 2, name: 'You', role: 'Customer' }
+      ],
+      messages: [
+        {
+          id: 1,
+          sender: 'FastVisa Support',
+          content: 'Hello! Welcome to FastVisa Support. How can we assist you with your visa application today?',
+          time: '13:45',
+          isCurrentUser: false
+        },
+        {
+          id: 2,
+          sender: 'You',
+          content: 'Hi! I need help with my tourist visa application for Japan.',
+          time: '13:47',
+          isCurrentUser: true
+        },
+        {
+          id: 3,
+          sender: 'FastVisa Support',
+          content: 'I\'d be happy to help! Could you please share your application reference number?',
+          time: '13:48',
+          isCurrentUser: false
+        }
+      ]
+    },
     {
       id: 1,
       title: 'Team Collaboration',
@@ -214,7 +248,14 @@ export default function HomePage() {
                             {index > 0 && (
                               <div className="h-px bg-[#828282] mx-6 my-4"></div>
                             )}
-                            <div onClick={() => setSelectedChat(chat)}>
+                            <div onClick={() => {
+                              setSelectedChat(chat);
+                              if (chat.title === 'FastVisa Support') {
+                                setIsConnecting(true);
+                                // Simulate connection delay
+                                setTimeout(() => setIsConnecting(false), 3000);
+                              }
+                            }}>
                               <ChatComponent
                                 title={chat.title}
                                 name={chat.name}
@@ -265,9 +306,8 @@ export default function HomePage() {
                   </div>
                   <div className="h-px w-full bg-[#E0E0E0] absolute left-0"></div>
                 </div>
-                <div className="bg-white rounded-lg p-6 h-[calc(90%))] flex flex-col">
-                  
-                  <div className="flex-1 overflow-y-auto pr-2">
+                <div className="bg-white rounded-lg p-6 flex flex-col" style={{ height: 'calc(90% - 80px)' }}>
+                  <div className="flex-1 overflow-y-auto pr-2 pb-24">
                     {selectedChat.messages ? (
                       (() => {
                         // Group messages by date
@@ -354,14 +394,16 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                  
-                  <MessageInput 
-                    onSend={(message) => {
-                      // Handle sending message
-                      console.log('Sending message:', message);
-                    }}
-                    className="mt-4"
-                  />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <MessageInput 
+                      onSend={(message: string) => {
+                        // Handle sending message
+                        console.log('Sending message:', message);
+                      }}
+                      className="mt-4"
+                      loading={selectedChat.title === 'FastVisa Support' && isConnecting}
+                    />
+                  </div>
                 </div>
               </div>
             )}
