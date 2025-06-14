@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
+import MessageInput from "@/components/ui/MessageInput";
 import FloatingCircle from "@/components/ui/FloatingCircle";
 import Modal from "@/components/ui/Modal";
 import Loading from "@/components/ui/Loading";
+import BubbleChat from "@/components/ui/BubbleChat";
 import ChatComponent from "@/components/ui/ChatComponent";
-import ThunderIcon from "@/components/ui/icons/ThunderIcon";
+import DateSeparator from "@/components/ui/DateSeparator";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
 import TaskIcon from "@/components/ui/icons/TaskIcon";
+import ThunderIcon from "@/components/ui/icons/ThunderIcon";
+
+// Helper function to format date to YYYY-MM-DD for grouping
+const formatDateKey = (date: Date): string => {
+  return date.toISOString().split('T')[0];
+};
 
 type ActiveCircle = 'task' | 'inbox' | null;
 
@@ -18,26 +26,117 @@ export default function HomePage() {
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
   
   // Sample chat data
   const [chats] = useState([
     {
       id: 1,
-      title: 'New Message',
+      title: 'Team Collaboration',
       name: 'John Doe',
-      content: 'Hi there! Just wanted to check in about the project timeline. Do you think we can have the first draft ready by Friday?'
+      content: 'Hi there! Just wanted to check in about the project timeline. Do you think we can have the first draft ready by Friday?',
+      participants: [
+        { id: 1, name: 'John Doe', role: 'Project Manager' },
+        { id: 2, name: 'Sarah Wilson', role: 'Designer' },
+        { id: 3, name: 'Alex Johnson', role: 'Developer' }
+      ],
+      messages: [
+        {
+          id: 1,
+          sender: 'Sarah Wilson',
+          content: 'I\'ve uploaded the latest design assets to the shared drive.',
+          time: '10:30',
+          isCurrentUser: false
+        },
+        {
+          id: 2,
+          sender: 'You',
+          content: 'Thanks Sarah! The designs look great. Alex, how long do you think the implementation will take?',
+          time: '10:35',
+          isCurrentUser: true
+        },
+        {
+          id: 3,
+          sender: 'Alex Johnson',
+          content: 'I should be able to implement this in about 2 days. I\'ll keep you updated on the progress.',
+          time: '10:40',
+          isCurrentUser: false
+        },
+        {
+          id: 4,
+          sender: 'John Doe',
+          content: 'Perfect! Let\'s aim to have everything ready by Friday then.',
+          time: '10:42',
+          isCurrentUser: false
+        }
+      ]
     },
     {
       id: 2,
-      title: 'Team Update',
+      title: 'Design Review',
       name: 'Sarah Wilson',
-      content: 'The design assets have been uploaded to the shared drive. Let me know if you need any adjustments.'
+      content: 'The design assets have been uploaded to the shared drive. Let me know if you need any adjustments.',
+      participants: [
+        { id: 1, name: 'Sarah Wilson', role: 'Designer' },
+        { id: 2, name: 'You', role: 'Developer' }
+      ],
+      messages: [
+        {
+          id: 1,
+          sender: 'Sarah Wilson',
+          content: 'I\'ve updated the dashboard design with the new color scheme. What do you think?',
+          time: '09:15',
+          isCurrentUser: false
+        },
+        {
+          id: 2,
+          sender: 'You',
+          content: 'The new colors look great! I especially like the contrast in the charts.',
+          time: '09:30',
+          isCurrentUser: true
+        },
+        {
+          id: 3,
+          sender: 'Sarah Wilson',
+          content: 'Thanks! I was thinking we could also add some micro-interactions to make it feel more polished.',
+          time: '09:32',
+          isCurrentUser: false
+        }
+      ]
     },
     {
       id: 3,
-      title: 'Meeting Reminder',
+      title: 'Sprint Planning',
       name: 'Alex Johnson',
-      content: 'Just a reminder about our 2pm sync tomorrow. We\'ll be discussing the Q2 marketing strategy.'
+      content: 'Just a reminder about our 2pm sync tomorrow. We\'ll be discussing the Q2 marketing strategy.',
+      participants: [
+        { id: 1, name: 'Alex Johnson', role: 'Developer' },
+        { id: 2, name: 'You', role: 'Developer' },
+        { id: 3, name: 'Jamie Smith', role: 'Product Owner' }
+      ],
+      messages: [
+        {
+          id: 1,
+          sender: 'Jamie Smith',
+          content: 'Let\'s plan out the next sprint. We need to prioritize the user authentication feature.',
+          time: '14:00',
+          isCurrentUser: false
+        },
+        {
+          id: 2,
+          sender: 'Alex Johnson',
+          content: 'I can take the backend implementation. It should take about 3 days to complete.',
+          time: '14:05',
+          isCurrentUser: false
+        },
+        {
+          id: 3,
+          sender: 'You',
+          content: 'I can handle the frontend integration. We should be able to complete this within the sprint.',
+          time: '14:10',
+          isCurrentUser: true
+        }
+      ]
     }
   ]);
 
@@ -87,46 +186,185 @@ export default function HomePage() {
           className="bg-[#F2F2F2]"
         >
           <div className="w-full h-full relative">
-            {/* Always show Search Bar */}
-            <div className="relative flex justify-center">
-              <SearchBar
-                absolute={false}
-                className="mt-[20px]"
-                width={666}
-                height={32}
-                bgColor="white"
-                textColor="#333"
-                borderColor="#828282"
-                placeholder="Search"
-                iconColor="#828282"
-                iconRightMargin={55}
-              />
-            </div>
+            {!selectedChat && (
+              <>
+                <div className="relative flex justify-center">
+                  <SearchBar
+                    absolute={false}
+                    className="mt-[20px]"
+                    width={666}
+                    height={32}
+                    bgColor="white"
+                    textColor="#333"
+                    borderColor="#828282"
+                    placeholder="Search"
+                    iconColor="#828282"
+                    iconRightMargin={55}
+                  />
+                </div>
+                
+                <div className="w-full h-[calc(100%-52px)] relative">
+                  {isLoading ? (
+                    <Loading />
+                  ) : (
+                    <div className="p-6 overflow-y-auto h-full">
+                      <div className="space-y-0">
+                        {chats.map((chat, index) => (
+                          <div key={chat.id} className="relative">
+                            {index > 0 && (
+                              <div className="h-px bg-[#828282] mx-6 my-4"></div>
+                            )}
+                            <div onClick={() => setSelectedChat(chat)}>
+                              <ChatComponent
+                                title={chat.title}
+                                name={chat.name}
+                                content={chat.content}
+                                className="cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
             
-            {/* Show loading or content */}
-            <div className="w-full h-[calc(100%-52px)] relative">
-              {isLoading ? (
-                <Loading />
-              ) : (
-                <div className="p-6 overflow-y-auto h-full">
-                  <div className="space-y-0">
-                    {chats.map((chat, index) => (
-                      <div key={chat.id} className="relative">
-                        {index > 0 && (
-                          <div className="h-px bg-[#828282] mx-6 my-4"></div>
-                        )}
-                        <ChatComponent
-                          title={chat.title}
-                          name={chat.name}
-                          content={chat.content}
-                          className="cursor-pointer"
+            {selectedChat && (
+              <div className="h-full">
+                <div className="w-full">
+                  <div className="flex items-start justify-between p-4 pb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center mb-1">
+                        <button 
+                          onClick={() => setSelectedChat(null)}
+                          className="text-[#2F80ED] hover:no-underline flex items-center"
+                        >
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                            <path d="M18 12H6M12 6L6 12L12 18" stroke="#4f4f4f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <span className="font-medium">{selectedChat.title}</span>
+                        </button>
+                      </div>
+                      {selectedChat.participants && (
+                        <div className="text-sm text-gray-500 ml-8">
+                          {selectedChat.participants.length} participants
+                        </div>
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => setIsInboxModalOpen(false)}
+                      className="text-gray-500 hover:text-gray-700 mt-1"
+                      aria-label="Close modal"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="h-px w-full bg-[#E0E0E0] absolute left-0"></div>
+                </div>
+                <div className="bg-white rounded-lg p-6 h-[calc(90%))] flex flex-col">
+                  
+                  <div className="flex-1 overflow-y-auto pr-2">
+                    {selectedChat.messages ? (
+                      (() => {
+                        // Group messages by date
+                        const groupedMessages: Record<string, Array<typeof selectedChat.messages[0] & { date: Date }>> = {};
+                        const today = new Date();
+                        
+                        selectedChat.messages.forEach(message => {
+                          // For demo purposes, we'll use the current date minus message id to simulate different days
+                          // In a real app, you would use the actual message timestamp
+                          const messageDate = new Date();
+                          messageDate.setDate(today.getDate() - (message.id % 3)); // Simulate messages from different days
+                          
+                          const dateKey = formatDateKey(messageDate);
+                          if (!groupedMessages[dateKey]) {
+                            groupedMessages[dateKey] = [];
+                          }
+                          // Add date to message for rendering
+                          groupedMessages[dateKey].push({
+                            ...message,
+                            date: messageDate
+                          });
+                        });
+                        
+                        // Sort dates in descending order (newest first)
+                        const sortedDates = Object.keys(groupedMessages).sort().reverse();
+                        
+                        return sortedDates.flatMap((dateKey) => {
+                          const messages = groupedMessages[dateKey];
+                          const messageDate = new Date(dateKey);
+                          
+                          return [
+                            <DateSeparator key={`date-${dateKey}`} date={messageDate} />,
+                            ...messages.map((message) => {
+                              // Determine background color and sender color based on sender
+                              let backgroundColor = '#FFFFFF';
+                              let senderColor = '#4F4F4F';
+                              
+                              if (message.isCurrentUser) {
+                                backgroundColor = '#EEDCFF'; // Current user (You)
+                                senderColor = '#9B51E0';     // Purple for You
+                              } else if (message.sender === 'Jamie Smith') {
+                                backgroundColor = '#D2F2EA';  // Light mint green for Jamie
+                                senderColor = '#43B78D';      // Teal for Jamie
+                              } else {
+                                // For other senders, use a consistent color based on their name
+                                const senderIndex = selectedChat.participants?.findIndex(p => p.name === message.sender) || 0;
+                                const bgColors = ['#FCEED3', '#E5F3FF', '#FFE5E5', '#F0F0F0'];
+                                const nameColors = ['#E5A443', '#43B78D', '#4F4F4F', '#000000'];
+                                
+                                backgroundColor = bgColors[senderIndex % bgColors.length];
+                                senderColor = nameColors[senderIndex % nameColors.length];
+                              }
+
+                              return (
+                                <div 
+                                  key={message.id} 
+                                  className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}
+                                >
+                                  <BubbleChat
+                                    sender={message.sender}
+                                    content={message.content}
+                                    time={message.time}
+                                    senderColor={senderColor}
+                                    className="max-w-[80%]"
+                                    alignRight={message.isCurrentUser}
+                                    backgroundColor={backgroundColor}
+                                    showSenderName={true}
+                                  />
+                                </div>
+                              );
+                            })
+                          ];
+                        });
+                      })()
+                    ) : (
+                      <div className="flex justify-center items-center h-full">
+                        <BubbleChat
+                          sender={selectedChat.name}
+                          content={selectedChat.content}
+                          time={new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          senderColor="#4F4F4F"
+                          className="bg-gray-100 w-full max-w-[80%]"
                         />
                       </div>
-                    ))}
+                    )}
                   </div>
+                  
+                  <MessageInput 
+                    onSend={(message) => {
+                      // Handle sending message
+                      console.log('Sending message:', message);
+                    }}
+                    className="mt-4"
+                  />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </Modal>
         <SearchBar iconPosition="left" iconLeftMargin={28} borderRadius={0}/>
