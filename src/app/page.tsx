@@ -25,6 +25,7 @@ export default function HomePage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -175,9 +176,16 @@ export default function HomePage() {
   ]);
 
   const handleInboxClick = () => {
-    const newActiveCircle = activeCircle === 'inbox' ? null : 'inbox';
+    const isCurrentlyActive = activeCircle === 'inbox';
+    const newActiveCircle = isCurrentlyActive ? null : 'inbox';
+    
     setActiveCircle(newActiveCircle);
-    setIsInboxModalOpen(!!newActiveCircle);
+    setIsInboxModalOpen(!isCurrentlyActive);
+    
+    // Close task modal if it's open
+    if (activeCircle === 'task') {
+      setIsTaskModalOpen(false);
+    }
     
     if (newActiveCircle === 'inbox') {
       setIsLoading(true);
@@ -185,17 +193,27 @@ export default function HomePage() {
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);
-    } else {
-      setIsInboxModalOpen(false);
     }
   };
 
   const handleTaskClick = () => {
-    const newActiveCircle = activeCircle === 'task' ? null : 'task';
+    const isCurrentlyActive = activeCircle === 'task';
+    const newActiveCircle = isCurrentlyActive ? null : 'task';
+    
     setActiveCircle(newActiveCircle);
+    setIsTaskModalOpen(!isCurrentlyActive);
+    
+    // Close inbox modal if it's open
+    if (activeCircle === 'inbox') {
+      setIsInboxModalOpen(false);
+    }
     
     if (newActiveCircle === 'task') {
-      // Add any task-specific logic here
+      setIsLoading(true);
+      // Simulate loading for 1 second
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
@@ -409,6 +427,23 @@ export default function HomePage() {
             )}
           </div>
         </Modal>
+        
+        {/* Task Modal */}
+        <Modal 
+          isOpen={isTaskModalOpen}
+          width={734}
+          height={737}
+          className="bg-[#F2F2F2]"
+        >
+          <div className="w-full h-full p-6">
+            <h2 className="text-2xl font-bold mb-6">Tasks</h2>
+            {/* Add your task management UI here */}
+            <div className="bg-white rounded-lg p-4 shadow">
+              <p className="text-gray-600">Your task management content will go here</p>
+            </div>
+          </div>
+        </Modal>
+        
         <SearchBar iconPosition="left" iconLeftMargin={28} borderRadius={0}/>
 
         <div className="fixed bottom-0 right-0 z-50">
