@@ -12,6 +12,11 @@ interface LoadingProps {
    */
   color?: string;
   /**
+   * Loading text to display below the spinner
+   * @default 'Loading ...'
+   */
+  text?: string;
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -19,6 +24,7 @@ interface LoadingProps {
 
 const Loading: React.FC<LoadingProps> = ({
   color = '#C4C4C4',
+  text = 'Loading ...',
   className = '',
 }) => {
   const circleStyle: React.CSSProperties = {
@@ -48,7 +54,7 @@ const Loading: React.FC<LoadingProps> = ({
       `}</style>
       <div className="flex flex-col items-center justify-center" style={{ gap: '34px' }}>
         <div style={circleStyle}></div>
-        <span className="text-[#4F4F4F] text-sm">Loading Chats ...</span>
+        <span className="text-[#4F4F4F] text-sm">{text}</span>
       </div>
     </div>
   );

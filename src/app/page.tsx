@@ -199,12 +199,23 @@ export default function HomePage() {
     }
   };
 
+  const [isTaskLoading, setIsTaskLoading] = useState(false);
+
   const handleTaskClick = () => {
     const isCurrentlyActive = activeCircle === 'task';
     const newActiveCircle = isCurrentlyActive ? null : 'task';
     
     setActiveCircle(newActiveCircle);
-    setIsTaskModalOpen(!isCurrentlyActive);
+    const willOpenModal = !isCurrentlyActive;
+    setIsTaskModalOpen(willOpenModal);
+    
+    if (willOpenModal) {
+      setIsTaskLoading(true);
+      // Simulate loading for 1 second
+      setTimeout(() => {
+        setIsTaskLoading(false);
+      }, 1000);
+    }
     
     // Close inbox modal if it's open
     if (activeCircle === 'inbox') {
@@ -260,7 +271,7 @@ export default function HomePage() {
                 
                 <div className="w-full h-[calc(100%-52px)] relative">
                   {isLoading ? (
-                    <Loading />
+                    <Loading text='Loading Chats ...' />
                   ) : (
                     <div className="p-6 overflow-y-auto h-full">
                       <div className="space-y-0">
@@ -463,9 +474,15 @@ export default function HomePage() {
             
             {/* Task List */}
             <div className="flex-1 p-6 overflow-auto">
-              <div className="bg-white rounded-lg p-6 shadow">
-                <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
-              </div>
+              {isTaskLoading ? (
+                <div className="h-full">
+                  <Loading text="Loading Task List ..." />
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg p-6 shadow">
+                  <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
+                </div>
+              )}
             </div>
           </div>
         </Modal>
