@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Button from './Button';
 
 interface MessageInputProps {
   /**
@@ -53,7 +54,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
       )}
       <div className="border-t border-gray-200 pt-4">
         <form onSubmit={handleSubmit} className="flex items-center gap-4">
-          <div className="flex-1 rounded-md px-4 py-3 border border-gray-300">
+          <div className="flex-1 rounded-md px-4 py-2 border border-gray-300">
             <input
               type="text"
               value={message}
@@ -63,13 +64,13 @@ const MessageInput: React.FC<MessageInputProps> = ({
               disabled={loading}
             />
           </div>
-          <button 
+          <Button 
             type="submit"
-            className="bg-[#2F80ED] text-white text-sm font-medium px-6 py-[12px] rounded-md hover:opacity-90 transition-opacity"
             disabled={!message.trim() || loading}
+            className="px-5"
           >
             Send
-          </button>
+          </Button>
         </form>
       </div>
     </div>
