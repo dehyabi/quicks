@@ -5,6 +5,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
 import MessageInput from "@/components/ui/MessageInput";
 import FloatingCircle from "@/components/ui/FloatingCircle";
+import Dropdown from "@/components/ui/Dropdown";
+import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Loading from "@/components/ui/Loading";
 import BubbleChat from "@/components/ui/BubbleChat";
@@ -435,11 +437,34 @@ export default function HomePage() {
           height={737}
           className="bg-[#F2F2F2]"
         >
-          <div className="w-full h-full p-6">
-            <h2 className="text-2xl font-bold mb-6">Tasks</h2>
-            {/* Add your task management UI here */}
-            <div className="bg-white rounded-lg p-4 shadow">
-              <p className="text-gray-600">Your task management content will go here</p>
+          <div className="w-full h-full flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <div className="w-48">
+                <Dropdown
+                  items={[
+                    { label: 'Personal Errands', value: 'personal' },
+                    { label: 'Urgent To-Do', value: 'urgent' },
+                  ]}
+                  value=""
+                  onChange={(value) => console.log('Selected:', value)}
+                  placeholder="My Tasks"
+                  className="w-full"
+                />
+              </div>
+              <Button 
+                onClick={() => console.log('New Task clicked')}
+                className="px-4 py-2 text-sm"
+              >
+                New Task
+              </Button>
+            </div>
+            
+            {/* Task List */}
+            <div className="flex-1 p-6 overflow-auto">
+              <div className="bg-white rounded-lg p-6 shadow">
+                <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
+              </div>
             </div>
           </div>
         </Modal>
