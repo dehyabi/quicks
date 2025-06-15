@@ -10,6 +10,7 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Loading from "@/components/ui/Loading";
 import BubbleChat from "@/components/ui/BubbleChat";
+import Task from "@/components/ui/Task";
 import ChatComponent from "@/components/ui/ChatComponent";
 import DateSeparator from "@/components/ui/DateSeparator";
 import InboxIcon from "@/components/ui/icons/InboxIcon";
@@ -28,10 +29,42 @@ export default function HomePage() {
   const [activeCircle, setActiveCircle] = useState<ActiveCircle>(null);
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isTaskLoading, setIsTaskLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedTaskType, setSelectedTaskType] = useState('');
+  
+  // Tasks state
+  const [tasks, setTasks] = useState([
+    {
+      id: '1',
+      title: 'Complete project proposal',
+      description: 'Write and submit the project proposal document with all requirements and timeline.',
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      isCompleted: false,
+    },
+    {
+      id: '2',
+      title: 'Team meeting',
+      description: 'Weekly sync with the development team to discuss progress and blockers.',
+      dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+      isCompleted: true,
+    },
+    {
+      id: '3',
+      title: 'Code review',
+      description: 'Review pull requests and provide feedback to the team.',
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
+      isCompleted: false,
+    },
+  ]);
+
+  const toggleTaskCompletion = (taskId: string) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, isCompleted: !task.isCompleted } : task
+    ));
+  };
   
   // Sample chat data
   const [chats] = useState([
@@ -199,8 +232,6 @@ export default function HomePage() {
     }
   };
 
-  const [isTaskLoading, setIsTaskLoading] = useState(false);
-
   const handleTaskClick = () => {
     const isCurrentlyActive = activeCircle === 'task';
     const newActiveCircle = isCurrentlyActive ? null : 'task';
@@ -223,10 +254,10 @@ export default function HomePage() {
     }
     
     if (newActiveCircle === 'task') {
-      setIsLoading(true);
+      setIsTaskLoading(true);
       // Simulate loading for 1 second
       setTimeout(() => {
-        setIsLoading(false);
+        setIsTaskLoading(false);
       }, 1000);
     }
   };
@@ -451,7 +482,7 @@ export default function HomePage() {
         >
           <div className="w-full h-full flex flex-col">
             {/* Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center p-6">
               <div className="w-48 ml-[80px]">
                 <Dropdown
                   items={[
@@ -473,16 +504,35 @@ export default function HomePage() {
             </div>
             
             {/* Task List */}
-            <div className="flex-1 p-6 overflow-auto">
+            <div className="flex-1 overflow-hidden flex flex-col">
               {isTaskLoading ? (
-                <div className="h-full">
+                <div className="h-full flex items-center justify-center">
                   <Loading text="Loading Task List ..." />
                 </div>
               ) : (
-                <div className="bg-white rounded-lg p-6 shadow">
-                  <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
+                <div className="flex-1 overflow-y-auto">
+                  {tasks.length > 0 ? (
+                    <div>
+                      {tasks.map((task) => (
+                        <Task
+                          key={task.id}
+                          id={task.id}
+                          title={task.title}
+                          description={task.description}
+                          dueDate={new Date(task.dueDate)}
+                          isCompleted={task.isCompleted}
+                          onToggleComplete={toggleTaskCompletion}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
+                    </div>
+                  )}
                 </div>
               )}
+              
             </div>
           </div>
         </Modal>
