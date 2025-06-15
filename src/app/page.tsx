@@ -31,6 +31,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [selectedTaskType, setSelectedTaskType] = useState('');
   
   // Sample chat data
   const [chats] = useState([
@@ -440,14 +441,14 @@ export default function HomePage() {
           <div className="w-full h-full flex flex-col">
             {/* Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <div className="w-48">
+              <div className="w-48 ml-[80px]">
                 <Dropdown
                   items={[
                     { label: 'Personal Errands', value: 'personal' },
                     { label: 'Urgent To-Do', value: 'urgent' },
                   ]}
-                  value=""
-                  onChange={(value) => console.log('Selected:', value)}
+                  value={selectedTaskType}
+                  onChange={(value) => setSelectedTaskType(value)}
                   placeholder="My Tasks"
                   className="w-full"
                 />
