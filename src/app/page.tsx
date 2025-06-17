@@ -65,6 +65,27 @@ export default function HomePage() {
       task.id === taskId ? { ...task, isCompleted: !task.isCompleted } : task
     ));
   };
+
+  const addNewTask = () => {
+    const newTask = {
+      id: Date.now().toString(),
+      title: 'Type Task Title',
+      description: '',
+      dueDate: new Date(),
+      isCompleted: false,
+    };
+    setTasks([newTask, ...tasks]);
+  };
+
+  const updateTask = (taskId: string, updates: any) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, ...updates } : task
+    ));
+  };
+
+  const deleteTask = (taskId: string) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
   
   // Sample chat data
   const [chats] = useState([
@@ -496,8 +517,8 @@ export default function HomePage() {
                 />
               </div>
               <Button 
-                onClick={() => console.log('New Task clicked')}
-                className="px-4 py-2 text-sm"
+                onClick={addNewTask}
+                className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white"
               >
                 New Task
               </Button>
@@ -522,6 +543,8 @@ export default function HomePage() {
                           dueDate={new Date(task.dueDate)}
                           isCompleted={task.isCompleted}
                           onToggleComplete={toggleTaskCompletion}
+                          onUpdate={updateTask}
+                          onDelete={deleteTask}
                         />
                       ))}
                     </div>
