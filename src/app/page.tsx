@@ -122,6 +122,14 @@ export default function HomePage() {
     }
   };
   
+  // Chat reply state
+  const [replyingTo, setReplyingTo] = useState<{
+    messageId: string;
+    sender: string;
+    content: string;
+    senderColor: string;
+  } | null>(null);
+
   // Fetch chat data from API
   const [chats, setChats] = useState([]);
   const [isChatsLoading, setIsChatsLoading] = useState(true);
@@ -409,6 +417,16 @@ export default function HomePage() {
                                     alignRight={message.isCurrentUser}
                                     backgroundColor={backgroundColor}
                                     showSenderName={true}
+                                    showReplyPreview={replyingTo?.messageId === message.id}
+                                    onReply={(e, content) => {
+                                      setReplyingTo({
+                                        messageId: message.id,
+                                        sender: message.sender,
+                                        content: content,
+                                        senderColor: senderColor
+                                      });
+                                    }}
+                                    onCancelReply={() => setReplyingTo(null)}
                                   />
                                 </div>
                               );
@@ -429,7 +447,31 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
+                    <div className="w-full">
+                    <div className="relative">
+                      {replyingTo && (
+                        <div className="absolute bottom-full left-0 mb-0 bg-white border border-[#4f4f4f] rounded-t-lg border-b-0 w-[607px]">
+                          <div className="flex justify-between items-center p-3">
+                            <div className="text-[14px] font-lato font-bold text-[#4f4f4f]">
+                              Replying to {replyingTo.sender}
+                            </div>
+                            <button 
+                              onClick={() => setReplyingTo(null)}
+                              className="text-gray-500 hover:text-gray-700"
+                              aria-label="Cancel reply"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
+                          </div>
+                          <div className="text-sm text-[#4f4f4f] px-3 pb-2 break-words whitespace-pre-wrap">{replyingTo.content}</div>
+                        </div>
+                      )}
+                    </div>
                     <MessageInput 
+                      className={replyingTo ? 'rounded-tr-none' : ''}
+                      buttonClassName="px-6 ml-2 h-auto rounded-lg border border-[#2f80ed] bg-[#2f80ed] text-white hover:bg-[#1a6ed8] transition-colors"
                       onSend={async (message: string) => {
                         if (!selectedChat) return;
                         
@@ -442,6 +484,7 @@ export default function HomePage() {
                             body: JSON.stringify({
                               chatId: selectedChat.id,
                               message: message,
+                              replyTo: replyingTo ? replyingTo.messageId : null
                             }),
                           });
                           
@@ -460,13 +503,17 @@ export default function HomePage() {
                           if (selectedChat) {
                             setSelectedChat(data.chat);
                           }
+                          
+                          // Clear the reply state
+                          setReplyingTo(null);
                         } catch (error) {
                           console.error('Error sending message:', error);
                           // You might want to show an error message to the user here
                         }
                       }} 
-                      placeholder="Type a message..."
+                      placeholder={replyingTo ? 'Type a reply...' : 'Type a message...'}
                     />
+                  </div>
                   </div>
                 </div>
               </div>

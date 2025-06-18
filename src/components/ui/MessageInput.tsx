@@ -12,9 +12,13 @@ interface MessageInputProps {
    */
   onSend?: (message: string) => void;
   /**
-   * Additional CSS classes
+   * Additional CSS classes for the container
    */
   className?: string;
+  /**
+   * Additional CSS classes for the button
+   */
+  buttonClassName?: string;
   /**
    * Whether to show loading state
    * @default false
@@ -31,6 +35,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
   placeholder = 'Type a new message',
   onSend,
   className = '',
+  buttonClassName = 'px-6 ml-2 h-auto rounded-lg border border-[#4f4f4f] bg-white text-[#4f4f4f] hover:bg-gray-100 transition-colors',
   loading = false,
   loadingText = 'Please wait while we connect you with our team...',
 }) => {
@@ -52,22 +57,22 @@ const MessageInput: React.FC<MessageInputProps> = ({
           <span className="text-sm text-[#4F4F4F]">{loadingText}</span>
         </div>
       )}
-      <div className="border-t border-gray-200 pt-4">
-        <form onSubmit={handleSubmit} className="flex items-center gap-4">
-          <div className="flex-1 rounded-md px-4 py-2 border border-gray-300">
+      <div className="border-t-0 pt-0 w-full">
+        <form onSubmit={handleSubmit} className="flex items-stretch w-full">
+          <div className={`flex-1 px-4 py-3 border border-[#4f4f4f] ${className.includes('rounded-tr-none') ? 'rounded-bl-lg rounded-br-[5px]' : 'rounded-tl-[5px] rounded-b-lg rounded-tr-lg'}`} style={{ borderTopLeftRadius: className.includes('rounded-tr-none') ? '0' : '5px' }}>
             <input
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={placeholder}
-              className="w-full bg-transparent outline-none text-sm"
+              className="w-full bg-transparent outline-none text-sm text-[#4f4f4f] placeholder:text-[#828282]"
               disabled={loading}
             />
           </div>
           <Button 
             type="submit"
             disabled={!message.trim() || loading}
-            className="px-5"
+            className={buttonClassName}
           >
             Send
           </Button>
