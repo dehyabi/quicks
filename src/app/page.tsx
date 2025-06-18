@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
 import SearchBar from "@/components/ui/SearchBar";
 import MessageInput from "@/components/ui/MessageInput";
@@ -87,150 +87,28 @@ export default function HomePage() {
     setTasks(tasks.filter(task => task.id !== taskId));
   };
   
-  // Sample chat data
-  const [chats] = useState([
-    {
-      id: 4,
-      title: 'FastVisa Support',
-      name: 'FastVisa Support',
-      content: 'Hello! How can we assist you with your visa application today?',
-      participants: [
-        { id: 1, name: 'FastVisa Support', role: 'Support Agent' },
-        { id: 2, name: 'You', role: 'Customer' }
-      ],
-      messages: [
-        {
-          id: 1,
-          sender: 'FastVisa Support',
-          content: 'Hello! Welcome to FastVisa Support. How can we assist you with your visa application today?',
-          time: '13:45',
-          isCurrentUser: false
-        },
-        {
-          id: 2,
-          sender: 'You',
-          content: 'Hi! I need help with my tourist visa application for Japan.',
-          time: '13:47',
-          isCurrentUser: true
-        },
-        {
-          id: 3,
-          sender: 'FastVisa Support',
-          content: 'I\'d be happy to help! Could you please share your application reference number?',
-          time: '13:48',
-          isCurrentUser: false
+  // Fetch chat data from API
+  const [chats, setChats] = useState([]);
+  const [isChatsLoading, setIsChatsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await fetch('/api/inbox');
+        if (!response.ok) {
+          throw new Error('Failed to fetch chats');
         }
-      ]
-    },
-    {
-      id: 1,
-      title: 'Team Collaboration',
-      name: 'John Doe',
-      content: 'Hi there! Just wanted to check in about the project timeline. Do you think we can have the first draft ready by Friday?',
-      participants: [
-        { id: 1, name: 'John Doe', role: 'Project Manager' },
-        { id: 2, name: 'Sarah Wilson', role: 'Designer' },
-        { id: 3, name: 'Alex Johnson', role: 'Developer' }
-      ],
-      messages: [
-        {
-          id: 1,
-          sender: 'Sarah Wilson',
-          content: 'I\'ve uploaded the latest design assets to the shared drive.',
-          time: '10:30',
-          isCurrentUser: false
-        },
-        {
-          id: 2,
-          sender: 'You',
-          content: 'Thanks Sarah! The designs look great. Alex, how long do you think the implementation will take?',
-          time: '10:35',
-          isCurrentUser: true
-        },
-        {
-          id: 3,
-          sender: 'Alex Johnson',
-          content: 'I should be able to implement this in about 2 days. I\'ll keep you updated on the progress.',
-          time: '10:40',
-          isCurrentUser: false
-        },
-        {
-          id: 4,
-          sender: 'John Doe',
-          content: 'Perfect! Let\'s aim to have everything ready by Friday then.',
-          time: '10:42',
-          isCurrentUser: false
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Design Review',
-      name: 'Sarah Wilson',
-      content: 'The design assets have been uploaded to the shared drive. Let me know if you need any adjustments.',
-      participants: [
-        { id: 1, name: 'Sarah Wilson', role: 'Designer' },
-        { id: 2, name: 'You', role: 'Developer' }
-      ],
-      messages: [
-        {
-          id: 1,
-          sender: 'Sarah Wilson',
-          content: 'I\'ve updated the dashboard design with the new color scheme. What do you think?',
-          time: '09:15',
-          isCurrentUser: false
-        },
-        {
-          id: 2,
-          sender: 'You',
-          content: 'The new colors look great! I especially like the contrast in the charts.',
-          time: '09:30',
-          isCurrentUser: true
-        },
-        {
-          id: 3,
-          sender: 'Sarah Wilson',
-          content: 'Thanks! I was thinking we could also add some micro-interactions to make it feel more polished.',
-          time: '09:32',
-          isCurrentUser: false
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: 'Sprint Planning',
-      name: 'Alex Johnson',
-      content: 'Just a reminder about our 2pm sync tomorrow. We\'ll be discussing the Q2 marketing strategy.',
-      participants: [
-        { id: 1, name: 'Alex Johnson', role: 'Developer' },
-        { id: 2, name: 'You', role: 'Developer' },
-        { id: 3, name: 'Jamie Smith', role: 'Product Owner' }
-      ],
-      messages: [
-        {
-          id: 1,
-          sender: 'Jamie Smith',
-          content: 'Let\'s plan out the next sprint. We need to prioritize the user authentication feature.',
-          time: '14:00',
-          isCurrentUser: false
-        },
-        {
-          id: 2,
-          sender: 'Alex Johnson',
-          content: 'I can take the backend implementation. It should take about 3 days to complete.',
-          time: '14:05',
-          isCurrentUser: false
-        },
-        {
-          id: 3,
-          sender: 'You',
-          content: 'I can handle the frontend integration. We should be able to complete this within the sprint.',
-          time: '14:10',
-          isCurrentUser: true
-        }
-      ]
-    }
-  ]);
+        const data = await response.json();
+        setChats(data.chats);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      } finally {
+        setIsChatsLoading(false);
+      }
+    };
+
+    fetchChats();
+  }, []);
 
   const handleInboxClick = () => {
     const isCurrentlyActive = activeCircle === 'inbox';
@@ -327,28 +205,44 @@ export default function HomePage() {
                   ) : (
                     <div className="p-6 overflow-y-auto h-full">
                       <div className="space-y-0">
-                        {chats.map((chat, index) => (
-                          <div key={chat.id} className="relative">
-                            {index > 0 && (
-                              <div className="h-px bg-[#828282] mx-6 my-4"></div>
-                            )}
-                            <div onClick={() => {
-                              setSelectedChat(chat);
-                              if (chat.title === 'FastVisa Support') {
-                                setIsConnecting(true);
-                                // Simulate connection delay
-                                setTimeout(() => setIsConnecting(false), 3000);
-                              }
-                            }}>
-                              <ChatComponent
-                                title={chat.title}
-                                name={chat.name}
-                                content={chat.content}
-                                className="cursor-pointer"
-                              />
-                            </div>
+                        {isLoading ? (
+                          <div className="flex justify-center p-4">
+                            <Loading text="Loading chats..." />
                           </div>
-                        ))}
+                        ) : chats.length > 0 ? (
+                          chats.map((chat, index) => (
+                            <div key={chat.id} className="relative">
+                              {index > 0 && (
+                                <div className="h-px bg-[#828282] mx-6 my-4"></div>
+                              )}
+                              <div 
+                                onClick={() => {
+                                  // Find the full chat data from the chats array
+                                  const fullChat = chats.find(c => c.id === chat.id);
+                                  if (fullChat) {
+                                    setSelectedChat(fullChat);
+                                    if (fullChat.title === 'FastVisa Support') {
+                                      setIsConnecting(true);
+                                      setTimeout(() => setIsConnecting(false), 3000);
+                                    }
+                                  }
+                                }}
+                                className="cursor-pointer hover:bg-gray-50 p-2 rounded"
+                              >
+                                <ChatComponent
+                                  title={chat.title}
+                                  name={chat.name}
+                                  content={chat.content}
+                                  unreadCount={chat.messages.filter(m => !m.read && !m.isCurrentUser).length}
+                                />
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            No chats available
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -480,12 +374,42 @@ export default function HomePage() {
                   </div>
                   <div className="absolute bottom-6 left-6 right-6">
                     <MessageInput 
-                      onSend={(message: string) => {
-                        // Handle sending message
-                        console.log('Sending message:', message);
-                      }}
-                      className="mt-4"
-                      loading={selectedChat.title === 'FastVisa Support' && isConnecting}
+                      onSend={async (message: string) => {
+                        if (!selectedChat) return;
+                        
+                        try {
+                          const response = await fetch('/api/inbox', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              chatId: selectedChat.id,
+                              message: message,
+                            }),
+                          });
+                          
+                          if (!response.ok) {
+                            throw new Error('Failed to send message');
+                          }
+                          
+                          const data = await response.json();
+                          
+                          // Update the chat with the new message
+                          setChats(chats.map(chat => 
+                            chat.id === selectedChat.id ? data.chat : chat
+                          ));
+                          
+                          // Update the selected chat if it's open
+                          if (selectedChat) {
+                            setSelectedChat(data.chat);
+                          }
+                        } catch (error) {
+                          console.error('Error sending message:', error);
+                          // You might want to show an error message to the user here
+                        }
+                      }} 
+                      placeholder="Type a message..."
                     />
                   </div>
                 </div>

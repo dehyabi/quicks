@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable static exports for Netlify
-  output: 'export',
-
   // Ensure build outputs to the 'out' directory
   distDir: 'out',
 
