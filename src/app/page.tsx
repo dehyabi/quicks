@@ -36,60 +36,109 @@ export default function HomePage() {
   const [selectedTaskType, setSelectedTaskType] = useState('');
   
   // Tasks state
-  const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      title: 'Complete project proposal',
-      description: 'Write and submit the project proposal document with all requirements and timeline.',
-      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-      isCompleted: false,
-    },
-    {
-      id: '2',
-      title: 'Team meeting',
-      description: 'Weekly sync with the development team to discuss progress and blockers.',
-      dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-      isCompleted: true,
-    },
-    {
-      id: '3',
-      title: 'Code review',
-      description: 'Review pull requests and provide feedback to the team.',
-      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-      isCompleted: false,
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
-  const toggleTaskCompletion = (taskId: string) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, isCompleted: !task.isCompleted } : task
-    ));
+  const toggleTaskCompletion = async (taskId: string) => {
+    try {
+      setIsTaskLoading(true);
+      await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: taskId,
+          updates: { isCompleted: !tasks.find(task => task.id === taskId)?.isCompleted }
+        })
+      });
+      await fetchTasks();
+    } catch (error) {
+      console.error('Error toggling task completion:', error);
+    } finally {
+      setIsTaskLoading(false);
+    }
   };
 
-  const addNewTask = () => {
-    const newTask = {
-      id: Date.now().toString(),
-      title: 'Type Task Title',
-      description: '',
-      dueDate: new Date(),
-      isCompleted: false,
-    };
-    setTasks([newTask, ...tasks]);
+  const addNewTask = async () => {
+    try {
+      setIsTaskLoading(true);
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: 'Type Task Title',
+          description: '',
+          dueDate: new Date()
+        })
+      });
+      if (!response.ok) throw new Error('Failed to create task');
+      const newTask = await response.json();
+      setTasks([newTask, ...tasks]);
+    } catch (error) {
+      console.error('Error creating task:', error);
+    } finally {
+      setIsTaskLoading(false);
+    }
   };
 
-  const updateTask = (taskId: string, updates: any) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, ...updates } : task
-    ));
+  const updateTask = async (taskId: string, updates: any) => {
+    try {
+      setIsTaskLoading(true);
+      await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: taskId,
+          updates
+        })
+      });
+      await fetchTasks();
+    } catch (error) {
+      console.error('Error updating task:', error);
+    } finally {
+      setIsTaskLoading(false);
+    }
   };
 
-  const deleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const deleteTask = async (taskId: string) => {
+    try {
+      setIsTaskLoading(true);
+      await fetch('/api/tasks', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: taskId })
+      });
+      await fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    } finally {
+      setIsTaskLoading(false);
+    }
   };
   
   // Fetch chat data from API
   const [chats, setChats] = useState([]);
   const [isChatsLoading, setIsChatsLoading] = useState(true);
+
+  const fetchTasks = async () => {
+    try {
+      setIsTaskLoading(true);
+      const response = await fetch('/api/tasks');
+      if (!response.ok) throw new Error('Failed to fetch tasks');
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setIsTaskLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -106,8 +155,15 @@ export default function HomePage() {
         setIsChatsLoading(false);
       }
     };
-
-    fetchChats();
+    
+    const initializeData = async () => {
+      await Promise.all([
+        fetchChats(),
+        fetchTasks()
+      ]);
+    };
+    
+    initializeData();
   }, []);
 
   const handleInboxClick = () => {
