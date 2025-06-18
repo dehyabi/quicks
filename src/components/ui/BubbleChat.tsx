@@ -1,71 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const ThreeDotsIcon = ({ className = '' }) => (
-  <svg 
+  <svg
     className={className}
-    width="15" 
-    height="6" 
-    viewBox="0 0 24 6" 
-    fill="none" 
+    width="15"
+    height="6"
+    viewBox="0 0 24 6"
+    fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle 
-      cx="2.5" 
-      cy="2.5" 
-      r="2.5" 
-      fill="#828282"
-    />
-    <circle 
-      cx="12" 
-      cy="2.5" 
-      r="2.5" 
-      fill="#828282"
-    />
-    <circle 
-      cx="21" 
-      cy="2.5" 
-      r="2.5" 
-      fill="#828282"
-    />
+    <circle cx="2.5" cy="2.5" r="2.5" fill="#828282" />
+    <circle cx="12" cy="2.5" r="2.5" fill="#828282" />
+    <circle cx="21" cy="2.5" r="2.5" fill="#828282" />
   </svg>
 );
 
 interface BubbleChatProps {
-  /**
-   * Background color of the bubble
-   */
-  backgroundColor?: string;
-  /**
-   * Border radius of the bubble
-   */
-  borderRadius?: string;
-  /**
-   * Text color of the message
-   */
-  textColor?: string;
-  /**
-   * Time of the message
-   */
-  time: string;
-  /**
-   * Name of the sender
-   */
-  sender: string;
-  /**
-   * Color of the sender name
-   */
-  senderColor?: string;
-  /**
-   * Content of the message
-   */
-  content: string;
-  /**
-   * Additional CSS classes
-   */
-  className?: string;
-}
-
-interface BubbleChatProps {
   backgroundColor?: string;
   borderRadius?: string;
   textColor?: string;
@@ -74,19 +24,11 @@ interface BubbleChatProps {
   senderColor?: string;
   content: string;
   className?: string;
-  /**
-   * Align the bubble to the right (for current user's messages)
-   */
   alignRight?: boolean;
-  /**
-   * Whether to show the sender's name
-   * @default true
-   */
   showSenderName?: boolean;
-  /**
-   * Callback when the menu button is clicked
-   */
   onMenuClick?: (e: React.MouseEvent) => void;
+  onShare?: (e: React.MouseEvent) => void;
+  onReply?: (e: React.MouseEvent) => void;
 }
 
 const BubbleChat: React.FC<BubbleChatProps> = ({
@@ -101,94 +43,158 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
   alignRight = false,
   showSenderName = true,
   onMenuClick,
+  onShare,
+  onReply,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
 
   const handleMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowMenu(!showMenu);
+    setShowMenu((prev) => !prev);
+    setShowContextMenu(false);
     onMenuClick?.(e);
   };
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMenu(false);
-      }
-    };
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowContextMenu(true);
+    setShowMenu(false);
+  };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowContextMenu(false);
+    onShare?.(e);
+  };
+
+  const handleReply = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowContextMenu(false);
+    onReply?.(e);
+  };
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMenu(false);
-    // Add your edit logic here
     console.log('Edit clicked');
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowMenu(false);
-    // Add your delete logic here
     console.log('Delete clicked');
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target as Node) &&
+        !bubbleRef.current?.contains(event.target as Node)
+      ) {
+        setShowContextMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className={`relative flex ${alignRight ? 'flex-row-reverse' : 'flex-row'} items-start ${className}`}>
+    <div
+      className={`relative flex ${alignRight ? 'flex-row-reverse' : 'flex-row'} items-start ${className}`}
+    >
       <div className={`flex flex-col ${alignRight ? 'items-end' : 'items-start'}`}>
         {showSenderName && (
-          <div 
-            className={`font-medium mb-1 px-2 ${alignRight ? 'text-right' : 'text-left'}`} 
-            style={{ 
-              color: senderColor, 
+          <div
+            className={`font-medium mb-1 px-2 ${alignRight ? 'text-right' : 'text-left'}`}
+            style={{
+              color: senderColor,
               fontSize: '12px',
               width: '100%',
               paddingRight: alignRight ? '0.5rem' : '0',
-              paddingLeft: !alignRight ? '0.5rem' : '0'
+              paddingLeft: !alignRight ? '0.5rem' : '0',
             }}
           >
             {alignRight ? 'You' : sender}
           </div>
         )}
-        <div 
-          className="bubble-chat p-3 rounded-lg w-full"
+        <div
+          ref={bubbleRef}
+          className="bubble-chat p-3 rounded-lg w-full cursor-context-menu"
           style={{
             backgroundColor,
             borderRadius,
             color: textColor,
             alignSelf: alignRight ? 'flex-end' : 'flex-start',
+            userSelect: 'none',
           }}
+          onContextMenu={handleContextMenu}
         >
           <div className="flex flex-col">
             <div className="mb-1">{content}</div>
             <div className="text-xs text-gray-500">{time}</div>
           </div>
+
+          {showContextMenu && (
+            <div
+              ref={contextMenuRef}
+              className="absolute z-50 mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200"
+              style={{
+                top: '100%',
+                left: alignRight ? 'auto' : '0',
+                right: alignRight ? '0' : 'auto',
+              }}
+            >
+              <button
+                onClick={handleShare}
+                className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
+              >
+                Share
+              </button>
+              <div className="border-t border-gray-200 my-1" />
+              <button
+                onClick={handleReply}
+                className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
+              >
+                Reply
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Three-dot menu */}
       <div className="relative" ref={menuRef}>
-        <button 
+        <button
           onClick={handleMenuClick}
-          className={`flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors ${alignRight ? 'ml-2' : 'mr-2'}`}
+          className={`flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors ${
+            alignRight ? 'ml-2' : 'mr-2'
+          }`}
           style={{
             marginTop: showSenderName ? '1.5rem' : '0.5rem',
-            alignSelf: 'flex-start'
+            alignSelf: 'flex-start',
           }}
         >
           <ThreeDotsIcon />
         </button>
-        
+
         {showMenu && (
-          <div 
-            className={`absolute z-50 mt-1 w-40 bg-white rounded-md shadow-lg py-1 ${alignRight ? 'right-0' : 'left-0'}`}
-            style={{
-              border: '1px solid #E5E7EB',
-            }}
+          <div
+            className={`absolute z-50 mt-1 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200 ${
+              alignRight ? 'right-0' : 'left-0'
+            }`}
           >
             <button
               onClick={handleEdit}
@@ -196,7 +202,7 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
             >
               Edit
             </button>
-            <div className="border-t border-gray-200 my-1"></div>
+            <div className="border-t border-gray-200 my-1" />
             <button
               onClick={handleDelete}
               className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
