@@ -46,7 +46,8 @@ function convertTo24Hour(timeStr: string): string {
 
   if (!time || !modifier) return timeStr;
 
-  let [hours, minutes] = time.split(':');
+  const minutes = time.split(':')[1];
+  let hours = time.split(':')[0];
 
   if (hours === '12') {
     hours = '00';
@@ -75,6 +76,8 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
   onMenuClick,
   onShare,
   onReply,
+  // onCancelReply is intentionally unused but kept for API compatibility
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onCancelReply,
 }) => {
   const [showMenu, setShowMenu] = useState(false);

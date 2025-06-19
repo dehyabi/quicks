@@ -96,11 +96,7 @@ const mockChats = [
 ];
 
 // Define types for better type safety
-type Participant = {
-  id: number;
-  name: string;
-  role: string;
-};
+// Participant type removed as it's not used
 
 interface Message {
   id: number;
@@ -113,14 +109,7 @@ interface Message {
   replyToId?: number;
 };
 
-type Chat = {
-  id: number;
-  title: string;
-  name: string;
-  content: string;
-  participants: Participant[];
-  messages: Message[];
-};
+// Chat type removed as it's not used
 
 export async function GET() {
   try {
@@ -161,10 +150,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find the message being replied to, if any
-    let repliedToMessage = null;
+
+    // Verify replyTo exists in messages if provided
     if (replyTo) {
-      repliedToMessage = chat.messages.find(m => m.id === replyTo);
+      const replyExists = chat.messages.some(m => m.id === replyTo);
+      if (!replyExists) {
+        return NextResponse.json(
+          { error: 'Reply message not found' },
+          { status: 404 }
+        );
+      }
     }
 
     const newMessage: Message & { replyToId?: number } = {
@@ -174,13 +169,9 @@ export async function POST(request: Request) {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isCurrentUser: true,
       timestamp: new Date().toISOString(),
-      read: false
+      read: false,
+      ...(replyTo && { replyToId: replyTo })
     };
-
-    // Add replyToId if this is a reply
-    if (replyTo) {
-      newMessage.replyToId = replyTo;
-    }
 
     // In a real app, you would update the chat in the database
     chat.messages.push(newMessage);

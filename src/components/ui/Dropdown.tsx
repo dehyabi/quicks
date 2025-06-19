@@ -47,6 +47,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   value,
   onChange,
   placeholder = 'Select an option',
+  // className is intentionally unused but kept for API compatibility
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className = '',
   dropdownMenuClass = '',
   disabled = false,

@@ -28,7 +28,7 @@ let tasks = [
 export async function GET() {
   try {
     return NextResponse.json(tasks);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 });
   }
 }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     tasks = [newTask, ...tasks];
     return NextResponse.json(newTask);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
   }
 }
@@ -61,7 +61,7 @@ export async function PUT(request: Request) {
     );
     
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
   }
 }
@@ -73,7 +73,7 @@ export async function DELETE(request: Request) {
     tasks = tasks.filter(task => task.id !== id);
     
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
   }
 }

@@ -2,6 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from "@/components/layout/Sidebar";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string | Date;
+  isCompleted: boolean;
+}
 import SearchBar from "@/components/ui/SearchBar";
 import MessageInput from "@/components/ui/MessageInput";
 import FloatingCircle from "@/components/ui/FloatingCircle";
@@ -30,17 +38,28 @@ export default function HomePage() {
   const [isInboxModalOpen, setIsInboxModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isTaskLoading, setIsTaskLoading] = useState(false);
+  // Loading states for different parts of the application
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedChat, setSelectedChat] = useState<any>(null);
+  // Track when chat data is being loaded
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isChatsLoading, setIsChatsLoading] = useState(true);
+  // Track connection status for chat (e.g., when connecting to support)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isConnecting, setIsConnecting] = useState(false);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedTaskType, setSelectedTaskType] = useState('');
   
   // Tasks state
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const toggleTaskCompletion = async (taskId: string) => {
     try {
       setIsTaskLoading(true);
+      const taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) return;
+      
+      const updatedIsCompleted = !taskToUpdate.isCompleted;
+      
       await fetch('/api/tasks', {
         method: 'PUT',
         headers: {
@@ -48,12 +67,18 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           id: taskId,
-          updates: { isCompleted: !tasks.find(task => task.id === taskId)?.isCompleted }
+          updates: { isCompleted: updatedIsCompleted }
         })
       });
-      await fetchTasks();
+      
+      // Optimistically update the UI
+      setTasks(tasks.map(task => 
+        task.id === taskId ? { ...task, isCompleted: updatedIsCompleted } : task
+      ));
     } catch (error) {
       console.error('Error toggling task completion:', error);
+      // Revert the optimistic update if there's an error
+      await fetchTasks();
     } finally {
       setIsTaskLoading(false);
     }
@@ -83,7 +108,7 @@ export default function HomePage() {
     }
   };
 
-  const updateTask = async (taskId: string, updates: any) => {
+  const updateTask = async (taskId: string, updates: Record<string, unknown>) => {
     try {
       setIsTaskLoading(true);
       await fetch('/api/tasks', {
@@ -136,9 +161,38 @@ export default function HomePage() {
     return selectedChat.messages.find(msg => msg.id === messageId);
   };
 
-  // Fetch chat data from API
-  const [chats, setChats] = useState([]);
-  const [isChatsLoading, setIsChatsLoading] = useState(true);
+  // Chat related state with proper types (moved to top level for better organization)
+  interface ChatMessage {
+    id: string;
+    sender: string;
+    content: string;
+    time: string;
+    isCurrentUser: boolean;
+    replyToId?: string;
+    read: boolean;
+    date: Date;
+  }
+
+  interface ChatParticipant {
+    id: string;
+    name: string;
+    color: string;
+  }
+
+  interface Chat {
+    id: string;
+    title: string;
+    name: string;
+    content: string;
+    unreadCount: number;
+    messages: ChatMessage[];
+    participants: ChatParticipant[];
+  }
+
+  const [chats, setChats] = useState<Chat[]>([]);
+  // Chat loading states (commented out as they're not currently used)
+
+
 
   const fetchTasks = async () => {
     try {
@@ -171,10 +225,17 @@ export default function HomePage() {
     };
     
     const initializeData = async () => {
-      await Promise.all([
-        fetchChats(),
-        fetchTasks()
-      ]);
+      try {
+        setIsLoading(true);
+        await Promise.all([
+          fetchChats(),
+          fetchTasks()
+        ]);
+      } catch (error) {
+        console.error('Error initializing data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     initializeData();
@@ -300,10 +361,10 @@ export default function HomePage() {
                                 className="cursor-pointer hover:bg-gray-50 p-2 rounded"
                               >
                                 <ChatComponent
+                                  key={chat.id}
                                   title={chat.title}
                                   name={chat.name}
                                   content={chat.content}
-                                  unreadCount={chat.messages.filter(m => !m.read && !m.isCurrentUser).length}
                                 />
                               </div>
                             </div>
@@ -363,10 +424,12 @@ export default function HomePage() {
                         const today = new Date();
                         
                         selectedChat.messages.forEach(message => {
-                          // For demo purposes, we'll use the current date minus message id to simulate different days
+                          // For demo purposes, we'll use the current date minus a hash of the message id to simulate different days
                           // In a real app, you would use the actual message timestamp
                           const messageDate = new Date();
-                          messageDate.setDate(today.getDate() - (message.id % 3)); // Simulate messages from different days
+                          // Convert message.id to a number using a simple hash function
+                          const idHash = Array.from(message.id).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                          messageDate.setDate(today.getDate() - (idHash % 3)); // Simulate messages from different days
                           
                           const dateKey = formatDateKey(messageDate);
                           if (!groupedMessages[dateKey]) {
@@ -401,7 +464,7 @@ export default function HomePage() {
                                 senderColor = '#43B78D';      // Teal for Jamie
                               } else {
                                 // For other senders, use a consistent color based on their name
-                                const senderIndex = selectedChat.participants?.findIndex(p => p.name === message.sender) || 0;
+                                const senderIndex = selectedChat.participants?.findIndex((p: { name: string }) => p.name === message.sender) || 0;
                                 const bgColors = ['#FCEED3', '#E5F3FF', '#FFE5E5', '#F0F0F0'];
                                 const nameColors = ['#E5A443', '#43B78D', '#4F4F4F', '#000000'];
                                 
@@ -591,7 +654,7 @@ export default function HomePage() {
                     </div>
                   ) : (
                     <div className="h-full flex items-center justify-center">
-                      <p className="text-gray-600 text-center py-8">No tasks yet. Click 'New Task' to get started.</p>
+                      <p className="text-gray-600 text-center py-8">No tasks yet. Click &apos;New Task&apos; to get started.</p>
                     </div>
                   )}
                 </div>
