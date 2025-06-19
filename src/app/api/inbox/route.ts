@@ -102,7 +102,7 @@ type Participant = {
   role: string;
 };
 
-type Message = {
+interface Message {
   id: number;
   sender: string;
   content: string;
@@ -110,6 +110,7 @@ type Message = {
   isCurrentUser: boolean;
   timestamp: string;
   read: boolean;
+  replyToId?: number;
 };
 
 type Chat = {
@@ -142,7 +143,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { chatId, message } = await request.json();
+    const { chatId, message, replyTo } = await request.json();
     
     if (!chatId || !message) {
       return NextResponse.json(
@@ -160,7 +161,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const newMessage: Message = {
+    // Find the message being replied to, if any
+    let repliedToMessage = null;
+    if (replyTo) {
+      repliedToMessage = chat.messages.find(m => m.id === replyTo);
+    }
+
+    const newMessage: Message & { replyToId?: number } = {
       id: chat.messages.length + 1,
       sender: 'You',
       content: message,
@@ -169,6 +176,11 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
       read: false
     };
+
+    // Add replyToId if this is a reply
+    if (replyTo) {
+      newMessage.replyToId = replyTo;
+    }
 
     // In a real app, you would update the chat in the database
     chat.messages.push(newMessage);

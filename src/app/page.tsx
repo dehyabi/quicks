@@ -130,6 +130,12 @@ export default function HomePage() {
     senderColor: string;
   } | null>(null);
 
+  // Function to find a message by ID
+  const findMessageById = (messageId: string) => {
+    if (!selectedChat?.messages) return null;
+    return selectedChat.messages.find(msg => msg.id === messageId);
+  };
+
   // Fetch chat data from API
   const [chats, setChats] = useState([]);
   const [isChatsLoading, setIsChatsLoading] = useState(true);
@@ -403,6 +409,8 @@ export default function HomePage() {
                                 senderColor = nameColors[senderIndex % nameColors.length];
                               }
 
+                              const repliedToMessage = message.replyToId ? findMessageById(message.replyToId) : null;
+                              
                               return (
                                 <div 
                                   key={message.id} 
@@ -418,6 +426,12 @@ export default function HomePage() {
                                     backgroundColor={backgroundColor}
                                     showSenderName={true}
                                     showReplyPreview={replyingTo?.messageId === message.id}
+                                    replyTo={repliedToMessage ? {
+                                      sender: repliedToMessage.sender,
+                                      content: repliedToMessage.content,
+                                      senderColor: repliedToMessage.isCurrentUser ? '#9B51E0' : 
+                                        (repliedToMessage.sender === 'Jamie Smith' ? '#43B78D' : '#4F4F4F')
+                                    } : undefined}
                                     onReply={(e, content) => {
                                       setReplyingTo({
                                         messageId: message.id,

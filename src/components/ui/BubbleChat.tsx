@@ -1,31 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef } from 'react';
-
-interface ReplyPreviewProps {
-  sender: string;
-  content: string;
-  onClose: () => void;
-  senderColor: string;
-}
-
-const ReplyPreview = ({ sender, content, onClose, senderColor }: ReplyPreviewProps) => (
-  <div className="bg-[#f0f2f5] p-2 rounded-t-lg border-l-4" style={{ borderColor: senderColor }}>
-    <div className="flex justify-between items-center mb-1">
-      <div className="text-xs font-medium" style={{ color: senderColor }}>
-        Replying to {sender}
-      </div>
-      <button 
-        onClick={onClose}
-        className="text-gray-500 hover:text-gray-700"
-        aria-label="Cancel reply"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-    </div>
-    <div className="text-sm text-gray-700 truncate">{content}</div>
-  </div>
-);
+import React, { useState, useRef, useEffect } from 'react';
 
 const ThreeDotsIcon = ({ className = '' }) => (
   <svg
@@ -42,6 +15,12 @@ const ThreeDotsIcon = ({ className = '' }) => (
   </svg>
 );
 
+interface ReplyTo {
+  sender: string;
+  content: string;
+  senderColor: string;
+}
+
 interface BubbleChatProps {
   backgroundColor?: string;
   borderRadius?: string;
@@ -54,10 +33,30 @@ interface BubbleChatProps {
   alignRight?: boolean;
   showSenderName?: boolean;
   showReplyPreview?: boolean;
+  replyTo?: ReplyTo;
   onMenuClick?: (e: React.MouseEvent) => void;
   onShare?: (e: React.MouseEvent) => void;
   onReply?: (e: React.MouseEvent, message: string) => void;
   onCancelReply?: () => void;
+}
+
+// Helper to convert "hh:mm AM/PM" to "HH:mm"
+function convertTo24Hour(timeStr: string): string {
+  const [time, modifier] = timeStr.trim().split(' ');
+
+  if (!time || !modifier) return timeStr;
+
+  let [hours, minutes] = time.split(':');
+
+  if (hours === '12') {
+    hours = '00';
+  }
+
+  if (modifier.toLowerCase() === 'pm') {
+    hours = String(parseInt(hours, 10) + 12);
+  }
+
+  return `${hours.padStart(2, '0')}:${minutes}`;
 }
 
 const BubbleChat: React.FC<BubbleChatProps> = ({
@@ -72,6 +71,7 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
   alignRight = false,
   showSenderName = true,
   showReplyPreview = false,
+  replyTo,
   onMenuClick,
   onShare,
   onReply,
@@ -79,8 +79,6 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
-  const [replyPreview, setReplyPreview] = useState<ReplyPreviewProps | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -124,13 +122,9 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowMenu(false);
       }
-
       if (
         contextMenuRef.current &&
         !contextMenuRef.current.contains(event.target as Node) &&
@@ -145,14 +139,9 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
   }, []);
 
   return (
-    <div
-      className={`relative flex ${alignRight ? 'flex-row-reverse' : 'flex-row'} items-start ${className}`}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        handleContextMenu(e);
-      }}
-    >
-      <div className={`flex flex-col ${alignRight ? 'items-end' : 'items-start'}`}>
+    <div className={`relative flex ${alignRight ? 'justify-end' : 'justify-start'} ${className}`}>
+      <div className={`flex flex-col ${alignRight ? 'items-end' : 'items-start'} w-full`}>
+        {/* Sender name */}
         {showSenderName && (
           <div
             className={`font-medium mb-1 px-2 ${alignRight ? 'text-right' : 'text-left'}`}
@@ -160,104 +149,122 @@ const BubbleChat: React.FC<BubbleChatProps> = ({
               color: senderColor,
               fontSize: '12px',
               width: '100%',
-              paddingRight: alignRight ? '0.5rem' : '0',
-              paddingLeft: !alignRight ? '0.5rem' : '0',
             }}
           >
             {alignRight ? 'You' : sender}
           </div>
         )}
-        <div
-          ref={bubbleRef}
-          className="bubble-chat p-3 rounded-lg w-full cursor-context-menu"
-          style={{
-            backgroundColor,
-            borderRadius,
-            color: textColor,
-            alignSelf: alignRight ? 'flex-end' : 'flex-start',
-            userSelect: 'none',
-          }}
-          onContextMenu={handleContextMenu}
-        >
-          <div className="flex flex-col w-full">
-            <div className="mb-1">{content}</div>
-            <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-500">{time}</div>
+
+        {/* Reply preview */}
+        {replyTo && (
+          <div
+            className="p-3 rounded-lg bg-gray-100 text-sm text-gray-700 overflow-hidden relative mb-2.5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-xs line-clamp-2">{replyTo.content}</div>
+          </div>
+        )}
+
+        {/* Main message + menu */}
+        <div className={`flex items-start gap-[5px] ${alignRight ? 'flex-row]' : 'flex-row-reverse'} w-[400px]`}>
+          {/* Menu icon */}
+          <div ref={menuRef} className="relative mt-1.5">
+            <button
+              onClick={handleMenuClick}
+              className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <ThreeDotsIcon />
+            </button>
+
+            {showMenu && (
+              <div
+                className={`absolute z-50 mt-1 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200 ${
+                  alignRight ? 'left-0' : 'right-0'
+                }`}
+              >
+                <button
+                  onClick={handleEdit}
+                  className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
+                >
+                  Edit
+                </button>
+                <div className="border-t border-gray-200 my-1" />
+                <button
+                  onClick={handleDelete}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Bubble */}
+          <div
+            ref={bubbleRef}
+            className="bubble-chat p-3 rounded-lg cursor-context-menu flex-1"
+            style={{
+              backgroundColor,
+              borderRadius,
+              color: textColor,
+              maxWidth: '100%',
+              userSelect: 'none',
+            }}
+            onContextMenu={handleContextMenu}
+          >
+            {content}
+            <div className="flex justify-between items-center mt-2">
+              <div className="text-xs text-gray-500">
+                {convertTo24Hour(time)}
+              </div>
               {showReplyPreview && (
                 <div className="text-xs text-gray-500">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 9V5L3 12L10 19V14.9C15 14.9 18.5 16.5 21 20C20 15 17 10 10 9Z" fill="#4F4F4F" fillOpacity="0.5"/>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 9V5L3 12L10 19V14.9C15 14.9 18.5 16.5 21 20C20 15 17 10 10 9Z"
+                      fill="#4F4F4F"
+                      fillOpacity="0.5"
+                    />
                   </svg>
                 </div>
               )}
             </div>
           </div>
-
-          {showContextMenu && (
-            <div
-              ref={contextMenuRef}
-              className="absolute z-50 mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200"
-              style={{
-                top: '100%',
-                left: alignRight ? 'auto' : '0',
-                right: alignRight ? '0' : 'auto',
-              }}
-            >
-              <button
-                onClick={handleShare}
-                className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
-              >
-                Share
-              </button>
-              <div className="border-t border-gray-200 my-1" />
-              <button
-                onClick={handleReply}
-                className="flex items-center w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
-              >
-                Reply
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Three-dot menu */}
-      <div className="relative" ref={menuRef}>
-        <button
-          onClick={handleMenuClick}
-          className={`flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors ${
-            alignRight ? 'ml-2' : 'mr-2'
-          }`}
+      {/* Right-click context menu */}
+      {showContextMenu && (
+        <div
+          ref={contextMenuRef}
+          className="absolute z-50 mt-2 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200"
           style={{
-            marginTop: showSenderName ? '1.5rem' : '0.5rem',
-            alignSelf: 'flex-start',
+            top: '100%',
+            left: alignRight ? 'auto' : '0',
+            right: alignRight ? '0' : 'auto',
           }}
         >
-          <ThreeDotsIcon />
-        </button>
-
-        {showMenu && (
-          <div
-            className={`absolute z-50 mt-1 w-40 bg-white rounded-md shadow-lg py-1 border border-gray-200 ${
-              alignRight ? 'right-0' : 'left-0'
-            }`}
+          <button
+            onClick={handleShare}
+            className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
           >
-            <button
-              onClick={handleEdit}
-              className="block w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
-            >
-              Edit
-            </button>
-            <div className="border-t border-gray-200 my-1" />
-            <button
-              onClick={handleDelete}
-              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-            >
-              Delete
-            </button>
-          </div>
-        )}
-      </div>
+            Share
+          </button>
+          <div className="border-t border-gray-200 my-1" />
+          <button
+            onClick={handleReply}
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-[#2f80ed] hover:bg-gray-100"
+          >
+            Reply
+          </button>
+        </div>
+      )}
     </div>
   );
 };

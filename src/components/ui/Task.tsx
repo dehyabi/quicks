@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, ClockIcon, PencilIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronUpIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { EllipsisHorizontalIcon } from '@heroicons/react/20/solid';
 
 interface TaskProps {
@@ -36,8 +36,50 @@ const Task: React.FC<TaskProps> = ({
   const [isEditingTitle, setIsEditingTitle] = useState(!title || title === 'Type Task Title');
   const [editedDescription, setEditedDescription] = useState(description);
   const [editedTitle, setEditedTitle] = useState(title);
+  const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>(['Important ASAP']);
+  const [showBookmarkDropdown, setShowBookmarkDropdown] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
   const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
+  const bookmarkRef = useRef<HTMLDivElement>(null);
+
+  const toggleBookmark = (bookmarkLabel: string) => {
+    setSelectedBookmarks(prev => {
+      if (prev.includes(bookmarkLabel)) {
+        // If it's the last bookmark, don't remove it
+        if (prev.length === 1) return prev;
+        return prev.filter(label => label !== bookmarkLabel);
+      }
+      // Don't allow duplicates
+      if (!prev.includes(bookmarkLabel)) {
+        return [...prev, bookmarkLabel];
+      }
+      return prev;
+    });
+  };
+
+  const bookmarks = [
+    { label: 'Important ASAP', bgColor: '#e9f3ff' },
+    { label: 'Offline Meeting', bgColor: '#fdcfa4' },
+    { label: 'Virtual Meeting', bgColor: '#f9e9c3' },
+    { label: 'ASAP', bgColor: '#AFEBDB' },
+    { label: 'Client Related', bgColor: '#cbf1c2' },
+    { label: 'Self Task', bgColor: '#cfcef9' },
+    { label: 'Appointments', bgColor: '#f9e0fd' },
+    { label: 'Court Related', bgColor: '#9DD0ED' },
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (bookmarkRef.current && !bookmarkRef.current.contains(event.target as Node)) {
+        setShowBookmarkDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Focus the description input when editing starts
   useEffect(() => {
@@ -285,7 +327,9 @@ const Task: React.FC<TaskProps> = ({
       {isExpanded && (
         <div className="px-[20px] pb-4 pt-2 bg-gray-50">
           <div className="mb-3 flex items-center ml-11 relative">
-            <ClockIcon className={`h-4 w-4 ${!dueDatePicker ? 'text-[#4f4f4f]' : 'text-[#2f80ed]'} mr-2`} />
+            <svg width="20" height="20" viewBox="0 0 31 31" fill="none" className={`mr-2 ${!dueDatePicker ? 'text-[#4f4f4f]' : 'text-[#2f80ed]'}`}>
+              <path fillRule="evenodd" clipRule="evenodd" d="M15.2508 2.51465C8.31048 2.51465 2.69031 8.1474 2.69031 15.0877C2.69031 22.0281 8.31048 27.6608 15.2508 27.6608C22.2038 27.6608 27.8365 22.0281 27.8365 15.0877C27.8365 8.1474 22.2038 2.51465 15.2508 2.51465ZM15.2637 25.1462C9.70636 25.1462 5.20519 20.6451 5.20519 15.0878C5.20519 9.53045 9.70636 5.02928 15.2637 5.02928C20.821 5.02928 25.3221 9.53045 25.3221 15.0878C25.3221 20.6451 20.821 25.1462 15.2637 25.1462ZM14.0061 8.80121H15.8921V15.4021L21.55 18.7591L20.607 20.3056L14.0061 16.3451V8.80121Z" fill="currentColor"/>
+            </svg>
             <div className="relative" ref={datePickerRef}>
               <div 
                 onClick={() => setShowDatePicker(!showDatePicker)}
@@ -352,8 +396,10 @@ const Task: React.FC<TaskProps> = ({
               )}
             </div>
           </div>
-          <div className="flex items-start ml-11 mr-[30px]">
-            <PencilIcon className={`h-4 w-4 ${description && description !== 'No Description' ? 'text-[#2f80ed]' : 'text-[#4f4f4f]'} mt-0.5 mr-2 flex-shrink-0`} />
+          <div className="flex items-start ml-11 mr-[30px] mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 23" fill="none" className={`mr-2 flex-shrink-0 ${description && description !== 'No Description' ? 'text-[#2f80ed]' : 'text-[#4f4f4f]'}`}>
+              <path fillRule="evenodd" clipRule="evenodd" d="M19.3092 0C18.9949 0 18.668 0.125731 18.4291 0.36462L16.1282 2.6655L20.8431 7.38041L23.144 5.07953C23.6343 4.58918 23.6343 3.79708 23.144 3.30673L20.2019 0.36462C19.9504 0.113158 19.6361 0 19.3092 0ZM14.7831 7.569L15.9398 8.72573L4.54857 20.117H3.39185V18.9602L14.7831 7.569ZM0.877197 17.9167L14.783 4.01081L19.498 8.72572L5.59211 22.6316H0.877197V17.9167Z" fill="currentColor"/>
+            </svg>
             {isEditingDescription ? (
               <div className="flex-1">
                 <textarea
@@ -387,6 +433,60 @@ const Task: React.FC<TaskProps> = ({
                 )}
               </div>
             )}
+          </div>
+          
+          {/* Bookmark Section */}
+          <div className="flex items-center ml-11 mr-[30px] mb-3 relative" ref={bookmarkRef}>
+            <div className="mr-2">
+              <svg width="20" height="22" viewBox="0 0 29 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" clipRule="evenodd" d="M23.005 1.25732H11.116C9.80952 1.25732 8.75246 2.3889 8.75246 3.77194H20.6295C21.936 3.77194 23.005 4.90352 23.005 6.28656V22.6316L25.3804 23.8889V3.77194C25.3804 2.3889 24.3114 1.25732 23.005 1.25732ZM18.2543 8.80118V25.1085L13.254 22.8328L12.3157 22.4053L11.3774 22.8328L6.37719 25.1085V8.80118H18.2543ZM6.37712 6.28655H18.2542C19.5607 6.28655 20.6296 7.41813 20.6296 8.80117V28.9181L12.3157 25.1462L4.00171 28.9181V8.80117C4.00171 7.41813 5.07065 6.28655 6.37712 6.28655Z" fill="#2F80ED"/>
+              </svg>
+            </div>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowBookmarkDropdown(!showBookmarkDropdown);
+                }}
+                className="text-sm text-[#4f4f4f] hover:bg-gray-100 px-2 py-1 rounded"
+              >
+                <div className="flex flex-wrap gap-2.5">
+                  {selectedBookmarks.map(bookmarkLabel => {
+                    const bookmark = bookmarks.find(b => b.label === bookmarkLabel);
+                    return bookmark ? (
+                      <span 
+                        key={bookmark.label}
+                        className="px-2 py-0.5 rounded text-xs whitespace-nowrap"
+                        style={{ backgroundColor: bookmark.bgColor }}
+                      >
+                        {bookmark.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </button>
+              
+              {showBookmarkDropdown && (
+                <div className="absolute z-50 mt-1 w-[277px] h-[323px] bg-white rounded-md shadow-lg border border-gray-200 p-4 overflow-y-auto">
+                  <div className="flex flex-col items-center space-y-2.5">
+                    {bookmarks.map((bookmark) => (
+                      <button
+                        key={bookmark.label}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(bookmark.label);
+                        }}
+                        onDoubleClick={() => setShowBookmarkDropdown(false)}
+                        className={`w-[246px] h-[28px] rounded flex items-center text-sm text-[#4f4f4f] hover:opacity-90 transition-opacity pl-3 ${selectedBookmarks.includes(bookmark.label) ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`}
+                        style={{ backgroundColor: bookmark.bgColor }}
+                      >
+                        {bookmark.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
