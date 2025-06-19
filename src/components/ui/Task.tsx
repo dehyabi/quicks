@@ -467,8 +467,8 @@ const Task: React.FC<TaskProps> = ({
               </button>
               
               {showBookmarkDropdown && (
-                <div className="absolute z-50 mt-1 w-[277px] h-[323px] bg-white rounded-md shadow-lg border border-gray-200 p-4 overflow-y-auto">
-                  <div className="flex flex-col items-center space-y-2.5">
+                <div className="absolute z-50 mt-1 w-[277px] bg-white rounded-md shadow-lg border border-gray-200 p-4">
+                  <div className="flex flex-col items-center space-y-4">
                     {bookmarks.map((bookmark) => (
                       <button
                         key={bookmark.label}
@@ -477,7 +477,7 @@ const Task: React.FC<TaskProps> = ({
                           toggleBookmark(bookmark.label);
                         }}
                         onDoubleClick={() => setShowBookmarkDropdown(false)}
-                        className={`w-[246px] h-[28px] rounded flex items-center text-sm text-[#4f4f4f] hover:opacity-90 transition-opacity pl-3 ${selectedBookmarks.includes(bookmark.label) ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`}
+                        className={`w-[246px] min-h-[32px] py-1.5 rounded flex items-center text-sm text-[#4f4f4f] hover:opacity-90 transition-opacity pl-3 ${selectedBookmarks.includes(bookmark.label) ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`}
                         style={{ backgroundColor: bookmark.bgColor }}
                       >
                         {bookmark.label}
